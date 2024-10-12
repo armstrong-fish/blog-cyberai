@@ -2,30 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blog.licometa.me/</loc>
+    <loc>http://localhost:1313/</loc>
     <lastmod>2024-10-11T23:23:47-02:30</lastmod>
   </url><url>
-    <loc>https://blog.licometa.me/posts/</loc>
+    <loc>http://localhost:1313/posts/</loc>
     <lastmod>2024-10-11T23:23:47-02:30</lastmod>
   </url><url>
-    <loc>https://blog.licometa.me/posts/cybermate4/</loc>
+    <loc>http://localhost:1313/posts/cybermate4/</loc>
     <lastmod>2024-10-11T23:23:47-02:30</lastmod>
   </url><url>
-    <loc>https://blog.licometa.me/posts/cybermate3/</loc>
+    <loc>http://localhost:1313/posts/cybermate3/</loc>
     <lastmod>2024-10-11T23:22:21-02:30</lastmod>
   </url><url>
-    <loc>https://blog.licometa.me/posts/cybermate2/</loc>
+    <loc>http://localhost:1313/posts/cybermate2/</loc>
     <lastmod>2024-10-11T23:15:06-02:30</lastmod>
   </url><url>
-    <loc>https://blog.licometa.me/posts/cybermate1/</loc>
+    <loc>http://localhost:1313/posts/cybermate1/</loc>
     <lastmod>2024-10-11T23:14:19-02:30</lastmod>
   </url><url>
-    <loc>https://blog.licometa.me/archives/</loc>
+    <loc>http://localhost:1313/archives/</loc>
   </url><url>
-    <loc>https://blog.licometa.me/categories/</loc>
+    <loc>http://localhost:1313/categories/</loc>
   </url><url>
-    <loc>https://blog.licometa.me/series/</loc>
+    <loc>http://localhost:1313/series/</loc>
   </url><url>
-    <loc>https://blog.licometa.me/tags/</loc>
+    <loc>http://localhost:1313/tags/</loc>
   </url>
 </urlset>

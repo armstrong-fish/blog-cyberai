@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Cybermate!</title>
-    <link>https://blog.licometa.me/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on Cybermate!</description>
-    <generator>Hugo -- 0.135.0</generator>
+    <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 11 Oct 2024 23:23:47 -0230</lastBuildDate>
-    <atom:link href="https://blog.licometa.me/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 11 Oct 2024 23:23:47 -0230</lastBuildDate><atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>从零开始的赛博老婆！4 - 短期记忆与记忆体系</title>
-      <link>https://blog.licometa.me/posts/cybermate4/</link>
+      <link>http://localhost:1313/posts/cybermate4/</link>
       <pubDate>Fri, 11 Oct 2024 23:23:47 -0230</pubDate>
-      <guid>https://blog.licometa.me/posts/cybermate4/</guid>
-      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://blog.licometa.me/images/94008036_p0_master1200.jpg&#34; alt=&#34;&#34;  /&gt;
+      
+      <guid>http://localhost:1313/posts/cybermate4/</guid>
+      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/94008036_p0_master1200.jpg&#34; alt=&#34;&#34;  /&gt;
 &lt;/p&gt;
 &lt;p&gt;PIXIV: 94008036  @苏翼丶&lt;/p&gt;
 &lt;h1 id=&#34;agent记忆体系浅谈&#34;&gt;Agent记忆体系浅谈&lt;/h1&gt;
@@ -48,12 +48,14 @@
 &lt;h3 id=&#34;图数据库graph-database&#34;&gt;图数据库（Graph Database）&lt;/h3&gt;
 &lt;p&gt;图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>从零开始的赛博老婆！3 - TTS浅谈与实践</title>
-      <link>https://blog.licometa.me/posts/cybermate3/</link>
+      <link>http://localhost:1313/posts/cybermate3/</link>
       <pubDate>Fri, 11 Oct 2024 23:22:21 -0230</pubDate>
-      <guid>https://blog.licometa.me/posts/cybermate3/</guid>
-      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://blog.licometa.me/images/71888962_p0_master1200.jpg&#34; alt=&#34;Image Description&#34;  /&gt;
+      
+      <guid>http://localhost:1313/posts/cybermate3/</guid>
+      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/71888962_p0_master1200.jpg&#34; alt=&#34;Image Description&#34;  /&gt;
 &lt;/p&gt;
 &lt;p&gt;PIXIV: 71888962 &lt;a href=&#34;https://www.pixiv.net/users/1822272&#34;&gt;@Yuuri&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&#34;tts浅谈&#34;&gt;TTS浅谈&lt;/h2&gt;
@@ -104,12 +106,14 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;await&lt;/span&gt; communicate&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;save(OUTPUT_FILE)  
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;最后加上主函数，整体的代码如下：&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>从零开始的赛博老婆！2 - 基础Python环境搭建&#43;接入大语言模型</title>
-      <link>https://blog.licometa.me/posts/cybermate2/</link>
+      <link>http://localhost:1313/posts/cybermate2/</link>
       <pubDate>Fri, 11 Oct 2024 23:15:06 -0230</pubDate>
-      <guid>https://blog.licometa.me/posts/cybermate2/</guid>
-      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://blog.licometa.me/images/104755143_p0_master1200.jpg&#34; alt=&#34;&#34;  /&gt;
+      
+      <guid>http://localhost:1313/posts/cybermate2/</guid>
+      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/104755143_p0_master1200.jpg&#34; alt=&#34;&#34;  /&gt;
 
 Pixiv ID: 104755143&lt;/p&gt;
 &lt;p&gt;本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。&lt;/p&gt;
@@ -155,12 +159,14 @@ conda deactivate ai
 &lt;/code&gt;&lt;/pre&gt;&lt;h4 id=&#34;安装相关依赖&#34;&gt;安装相关依赖&lt;/h4&gt;
 &lt;p&gt;现在激活我们刚刚创建的环境，然后仍然是在CMD里&lt;em&gt;&lt;strong&gt;依次&lt;/strong&gt;&lt;/em&gt;输入此命令安装相关依赖：&lt;/p&gt;</description>
     </item>
+    
     <item>
       <title>从零开始的赛博老婆！1 - 系列索引</title>
-      <link>https://blog.licometa.me/posts/cybermate1/</link>
+      <link>http://localhost:1313/posts/cybermate1/</link>
       <pubDate>Fri, 11 Oct 2024 23:14:19 -0230</pubDate>
-      <guid>https://blog.licometa.me/posts/cybermate1/</guid>
-      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;https://blog.licometa.me/images/111325985_p0.jpg&#34; alt=&#34;&#34;  /&gt;
+      
+      <guid>http://localhost:1313/posts/cybermate1/</guid>
+      <description>&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/images/111325985_p0.jpg&#34; alt=&#34;&#34;  /&gt;
 
 Pixiv ID: 111325985&lt;/p&gt;
 &lt;p&gt;这里是一个系列教程的总目录,主要是分享一下我是如何创造一个类似于贾维斯的“赛博老婆”的.这个系列区别于RP,是偏向于Agent和日常助手的教程.你就把它理解为一个高度可定制的智能语音音箱吧,但是功能更强大.
@@ -213,5 +219,7 @@ Pixiv ID: 111325985&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;之后的系列,我根据这个列表慢慢发&lt;/p&gt;</description>
     </item>
+    
+    
   </channel>
 </rss>
