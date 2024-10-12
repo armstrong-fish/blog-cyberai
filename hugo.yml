@@ -1,0 +1,26 @@
+baseURL: 'https://blog.licometa.me'
+languageCode: 'en-us'
+title: 'Cybermate!'
+theme: 'PaperMod'
+frontmatter:
+  format: yaml
+taxonomies:
+  tag: tags
+  series: series
+  category: categories
+
+params:
+    ShowReadingTime: true
+    ShowToc: true
+    TocOpen: true
+    ShowCodeCopyButtons: true
+    fastSearch: true
+    homeInfoParams:
+        Title: Cybermate!
+
+menu:
+  main:
+    - identifier: Archive
+      name: Archive
+      url: /archives/
+      weight: 10

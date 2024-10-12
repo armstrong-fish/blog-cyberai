@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>从零开始的赛博老婆！2 - 基础Python环境搭建&#43;接入大语言模型 | Cybermate!</title>
+<meta name="keywords" content="">
+<meta name="description" content="
+
+Pixiv ID: 104755143
+本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。
+Python环境与依赖
+当你想运行你的赛博伙伴，你的代码是需要依赖库运行的，本文章使用了Python基础库和openai等库。请注意，当你的电脑里的python环境里没有正确安装相应的依赖库，代码无法正常运行。
+注：以下命令可能不适用于你的系统，请根据对应系统查询conda命令
+安装python环境或者安装anaconda环境管理器
+请去python官网或者anaconda官网里安装软件，二者选其一即可。本文推荐使用anaconda，避免出现好多个环境互相冲突的情况。
+如果你使用ARM架构的系统,可以尝试使用MiniForge,这个项目对ARM Python环境有一些优化,还是不错的。
+请注意，安装任意软件的时候请务必将其添加到系统变量或者系统路径中（大佬除外），否则无法使用CMD正常运行脚本，具体安装和排错等问题恕不在本教程范围内
+一般选择默认安装即可，安装好anaconda之后，，用打开你的CMD命令行窗口，运行以下命令检查conda是否安装成功：
+conda -V 
+# 或者
+conda --version
+如果出现“没有此命令”则安装不正常，请自行排错。
+# 更新conda
+conda update conda
+# 更新所有包
+conda update --all
+创建一个python环境
+注：本教程建议使用python3.11及以上版本，之前的版本没有经过测试，请尽量保证最新版本。
+我们给我们的赛博伙伴项目创建一个虚拟环境，以后我们就使用这个环境运行和赛博伙伴相关的代码，这样后续你统计依赖列表打包Docker镜像的时候很方便。
+使用此命令创建一个新的环境：
+conda create -n env_name
+例如：
+conda create -n ai
+激活环境并安装依赖
+激活环境
+使用以下命令激活特定的环境：
+conda activate env_name
+例如我们刚刚创建了一个名为ai的环境，现在我们要激活它：
+conda activate ai
+激活之后，我们所有的操作使用的就是这个环境里已经安装的包和依赖了，你会发现命令行的开头会有你当前的环境名称。每次你打开命令行，都检查一下是不是你所需要的环境，当然你也可以设置你的默认环境。
+你可以使用这个命令：
+conda env list 
+# 或
+conda info --envs 
+# 查看存在哪些虚拟环境
+你可能要用到这个命令关闭这个环境（但是先不要关闭，我们还要继续使用这个环境）：
+conda deactivate env_name
+# 例如关闭ai这个环境，关闭之后就是默认环境了
+conda deactivate ai
+安装相关依赖
+现在激活我们刚刚创建的环境，然后仍然是在CMD里依次输入此命令安装相关依赖：">
+<meta name="author" content="">
+<link rel="canonical" href="https://blog.licometa.me/posts/cybermate2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2335395c2bfc3803c675c5051856bb74c664fce999ae87dcedc812486409e3c0.css" integrity="sha256-IzU5XCv8OAPGdcUFGFa7dMZk/OmZrofc7cgSSGQJ48A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://blog.licometa.me/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://blog.licometa.me/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://blog.licometa.me/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://blog.licometa.me/apple-touch-icon.png">
+<link rel="mask-icon" href="https://blog.licometa.me/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://blog.licometa.me/posts/cybermate2/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="从零开始的赛博老婆！2 - 基础Python环境搭建&#43;接入大语言模型" />
+<meta property="og:description" content="
+
+Pixiv ID: 104755143
+本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。
+Python环境与依赖
+当你想运行你的赛博伙伴，你的代码是需要依赖库运行的，本文章使用了Python基础库和openai等库。请注意，当你的电脑里的python环境里没有正确安装相应的依赖库，代码无法正常运行。
+注：以下命令可能不适用于你的系统，请根据对应系统查询conda命令
+安装python环境或者安装anaconda环境管理器
+请去python官网或者anaconda官网里安装软件，二者选其一即可。本文推荐使用anaconda，避免出现好多个环境互相冲突的情况。
+如果你使用ARM架构的系统,可以尝试使用MiniForge,这个项目对ARM Python环境有一些优化,还是不错的。
+请注意，安装任意软件的时候请务必将其添加到系统变量或者系统路径中（大佬除外），否则无法使用CMD正常运行脚本，具体安装和排错等问题恕不在本教程范围内
+一般选择默认安装即可，安装好anaconda之后，，用打开你的CMD命令行窗口，运行以下命令检查conda是否安装成功：
+conda -V 
+# 或者
+conda --version
+如果出现“没有此命令”则安装不正常，请自行排错。
+# 更新conda
+conda update conda
+# 更新所有包
+conda update --all
+创建一个python环境
+注：本教程建议使用python3.11及以上版本，之前的版本没有经过测试，请尽量保证最新版本。
+我们给我们的赛博伙伴项目创建一个虚拟环境，以后我们就使用这个环境运行和赛博伙伴相关的代码，这样后续你统计依赖列表打包Docker镜像的时候很方便。
+使用此命令创建一个新的环境：
+conda create -n env_name
+例如：
+conda create -n ai
+激活环境并安装依赖
+激活环境
+使用以下命令激活特定的环境：
+conda activate env_name
+例如我们刚刚创建了一个名为ai的环境，现在我们要激活它：
+conda activate ai
+激活之后，我们所有的操作使用的就是这个环境里已经安装的包和依赖了，你会发现命令行的开头会有你当前的环境名称。每次你打开命令行，都检查一下是不是你所需要的环境，当然你也可以设置你的默认环境。
+你可以使用这个命令：
+conda env list 
+# 或
+conda info --envs 
+# 查看存在哪些虚拟环境
+你可能要用到这个命令关闭这个环境（但是先不要关闭，我们还要继续使用这个环境）：
+conda deactivate env_name
+# 例如关闭ai这个环境，关闭之后就是默认环境了
+conda deactivate ai
+安装相关依赖
+现在激活我们刚刚创建的环境，然后仍然是在CMD里依次输入此命令安装相关依赖：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.licometa.me/posts/cybermate2/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-10-11T23:15:06-02:30" />
+<meta property="article:modified_time" content="2024-10-11T23:15:06-02:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="从零开始的赛博老婆！2 - 基础Python环境搭建&#43;接入大语言模型"/>
+<meta name="twitter:description" content="
+
+Pixiv ID: 104755143
+本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。
+Python环境与依赖
+当你想运行你的赛博伙伴，你的代码是需要依赖库运行的，本文章使用了Python基础库和openai等库。请注意，当你的电脑里的python环境里没有正确安装相应的依赖库，代码无法正常运行。
+注：以下命令可能不适用于你的系统，请根据对应系统查询conda命令
+安装python环境或者安装anaconda环境管理器
+请去python官网或者anaconda官网里安装软件，二者选其一即可。本文推荐使用anaconda，避免出现好多个环境互相冲突的情况。
+如果你使用ARM架构的系统,可以尝试使用MiniForge,这个项目对ARM Python环境有一些优化,还是不错的。
+请注意，安装任意软件的时候请务必将其添加到系统变量或者系统路径中（大佬除外），否则无法使用CMD正常运行脚本，具体安装和排错等问题恕不在本教程范围内
+一般选择默认安装即可，安装好anaconda之后，，用打开你的CMD命令行窗口，运行以下命令检查conda是否安装成功：
+conda -V 
+# 或者
+conda --version
+如果出现“没有此命令”则安装不正常，请自行排错。
+# 更新conda
+conda update conda
+# 更新所有包
+conda update --all
+创建一个python环境
+注：本教程建议使用python3.11及以上版本，之前的版本没有经过测试，请尽量保证最新版本。
+我们给我们的赛博伙伴项目创建一个虚拟环境，以后我们就使用这个环境运行和赛博伙伴相关的代码，这样后续你统计依赖列表打包Docker镜像的时候很方便。
+使用此命令创建一个新的环境：
+conda create -n env_name
+例如：
+conda create -n ai
+激活环境并安装依赖
+激活环境
+使用以下命令激活特定的环境：
+conda activate env_name
+例如我们刚刚创建了一个名为ai的环境，现在我们要激活它：
+conda activate ai
+激活之后，我们所有的操作使用的就是这个环境里已经安装的包和依赖了，你会发现命令行的开头会有你当前的环境名称。每次你打开命令行，都检查一下是不是你所需要的环境，当然你也可以设置你的默认环境。
+你可以使用这个命令：
+conda env list 
+# 或
+conda info --envs 
+# 查看存在哪些虚拟环境
+你可能要用到这个命令关闭这个环境（但是先不要关闭，我们还要继续使用这个环境）：
+conda deactivate env_name
+# 例如关闭ai这个环境，关闭之后就是默认环境了
+conda deactivate ai
+安装相关依赖
+现在激活我们刚刚创建的环境，然后仍然是在CMD里依次输入此命令安装相关依赖："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://blog.licometa.me/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "从零开始的赛博老婆！2 - 基础Python环境搭建+接入大语言模型",
+      "item": "https://blog.licometa.me/posts/cybermate2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "从零开始的赛博老婆！2 - 基础Python环境搭建+接入大语言模型",
+  "name": "从零开始的赛博老婆！2 - 基础Python环境搭建\u002b接入大语言模型",
+  "description": " Pixiv ID: 104755143\n本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。\nPython环境与依赖 当你想运行你的赛博伙伴，你的代码是需要依赖库运行的，本文章使用了Python基础库和openai等库。请注意，当你的电脑里的python环境里没有正确安装相应的依赖库，代码无法正常运行。\n注：以下命令可能不适用于你的系统，请根据对应系统查询conda命令\n安装python环境或者安装anaconda环境管理器 请去python官网或者anaconda官网里安装软件，二者选其一即可。本文推荐使用anaconda，避免出现好多个环境互相冲突的情况。\n如果你使用ARM架构的系统,可以尝试使用MiniForge,这个项目对ARM Python环境有一些优化,还是不错的。\n请注意，安装任意软件的时候请务必将其添加到系统变量或者系统路径中（大佬除外），否则无法使用CMD正常运行脚本，具体安装和排错等问题恕不在本教程范围内\n一般选择默认安装即可，安装好anaconda之后，，用打开你的CMD命令行窗口，运行以下命令检查conda是否安装成功：\nconda -V # 或者 conda --version 如果出现“没有此命令”则安装不正常，请自行排错。\n# 更新conda conda update conda # 更新所有包 conda update --all 创建一个python环境 注：本教程建议使用python3.11及以上版本，之前的版本没有经过测试，请尽量保证最新版本。\n我们给我们的赛博伙伴项目创建一个虚拟环境，以后我们就使用这个环境运行和赛博伙伴相关的代码，这样后续你统计依赖列表打包Docker镜像的时候很方便。\n使用此命令创建一个新的环境：\nconda create -n env_name 例如：\nconda create -n ai 激活环境并安装依赖 激活环境 使用以下命令激活特定的环境：\nconda activate env_name 例如我们刚刚创建了一个名为ai的环境，现在我们要激活它：\nconda activate ai 激活之后，我们所有的操作使用的就是这个环境里已经安装的包和依赖了，你会发现命令行的开头会有你当前的环境名称。每次你打开命令行，都检查一下是不是你所需要的环境，当然你也可以设置你的默认环境。\n你可以使用这个命令：\nconda env list # 或 conda info --envs # 查看存在哪些虚拟环境 你可能要用到这个命令关闭这个环境（但是先不要关闭，我们还要继续使用这个环境）：\nconda deactivate env_name # 例如关闭ai这个环境，关闭之后就是默认环境了 conda deactivate ai 安装相关依赖 现在激活我们刚刚创建的环境，然后仍然是在CMD里依次输入此命令安装相关依赖：\n",
+  "keywords": [
+    
+  ],
+  "articleBody": " Pixiv ID: 104755143\n本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。\nPython环境与依赖 当你想运行你的赛博伙伴，你的代码是需要依赖库运行的，本文章使用了Python基础库和openai等库。请注意，当你的电脑里的python环境里没有正确安装相应的依赖库，代码无法正常运行。\n注：以下命令可能不适用于你的系统，请根据对应系统查询conda命令\n安装python环境或者安装anaconda环境管理器 请去python官网或者anaconda官网里安装软件，二者选其一即可。本文推荐使用anaconda，避免出现好多个环境互相冲突的情况。\n如果你使用ARM架构的系统,可以尝试使用MiniForge,这个项目对ARM Python环境有一些优化,还是不错的。\n请注意，安装任意软件的时候请务必将其添加到系统变量或者系统路径中（大佬除外），否则无法使用CMD正常运行脚本，具体安装和排错等问题恕不在本教程范围内\n一般选择默认安装即可，安装好anaconda之后，，用打开你的CMD命令行窗口，运行以下命令检查conda是否安装成功：\nconda -V # 或者 conda --version 如果出现“没有此命令”则安装不正常，请自行排错。\n# 更新conda conda update conda # 更新所有包 conda update --all 创建一个python环境 注：本教程建议使用python3.11及以上版本，之前的版本没有经过测试，请尽量保证最新版本。\n我们给我们的赛博伙伴项目创建一个虚拟环境，以后我们就使用这个环境运行和赛博伙伴相关的代码，这样后续你统计依赖列表打包Docker镜像的时候很方便。\n使用此命令创建一个新的环境：\nconda create -n env_name 例如：\nconda create -n ai 激活环境并安装依赖 激活环境 使用以下命令激活特定的环境：\nconda activate env_name 例如我们刚刚创建了一个名为ai的环境，现在我们要激活它：\nconda activate ai 激活之后，我们所有的操作使用的就是这个环境里已经安装的包和依赖了，你会发现命令行的开头会有你当前的环境名称。每次你打开命令行，都检查一下是不是你所需要的环境，当然你也可以设置你的默认环境。\n你可以使用这个命令：\nconda env list # 或 conda info --envs # 查看存在哪些虚拟环境 你可能要用到这个命令关闭这个环境（但是先不要关闭，我们还要继续使用这个环境）：\nconda deactivate env_name # 例如关闭ai这个环境，关闭之后就是默认环境了 conda deactivate ai 安装相关依赖 现在激活我们刚刚创建的环境，然后仍然是在CMD里依次输入此命令安装相关依赖：\n# Openai官方的python库 pip install openai 安装完成后我们准备进入下一步。\n相关的官方文档比较推荐，官方的文档是准确且值得反复推敲的。\nopenai官方文档\n创建一个python脚本 准备你的Open AI API 准备好你的能用的API token并妥善保存\n开始写代码 有人喜欢用脚本，有人喜欢用notebook交互式python，因人而异，喜欢啥用啥。我个人喜欢用脚本，notebook的用法请自行学习。\n建议安装并使用Visual Studio Code这个软件，大佬随意。不建议使用某自主研发会员制CEC IDE（因为穷）。使用VSC创建一个cyberai.py文件，保存在你能找得到的地方，然后我们开始输入代码：\n首先导入之前安装好的库中我们需要的部分,这个是Openai官方的python SDK库,可以用来调用兼容的API。\nfrom openai import OpenAI 然后我们开始基础设置,这个就相当于连接到运行LLM的服务器一样：\nbase_url是你的接入点，如果你使用的是非官方的第三方中转API，或者你使用了反向代理，那么你可能会用到这个，在双引号中间填入你的接入点链接，例如https://api.openai.com/v1/chat/completions。如果你可以正常连接到官方的接入点，这一行就可以删去不用。 api_key是你的API Token，在双引号里填写你的api。 chat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) 好的，我们已经完成一半了，我们将简单定义一个函数并在这个函数里调用我们刚刚设置好的模型：\n这个函数接受一个问题 question(字符串)作为参数。\n消息列表message是定义一条将要发送给LLM后端的消息体，其中包含系统消息（设定角色为猫娘并要求输出中文）和用户消息（用户输入的问题）。一般的格式如下,当然不同的LLM支持的消息体格式可能略有不同,例如写本文时,Claude的API就必须User开头,具体请查询对应API Doc。\n我们调用 chat_model.chat.completions.create方法生成对话响应，指定模型为 gpt-4o-mini，并设置温度参数为 0.7。\n最后我们从响应中提取生成的文本内容并返回。\ndef get_response_from_llm(question): message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"user\", \"content\": question}, ] response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=message, temperature=0.7, ) response_str = response.choices[0].message.content return response_str 这个函数收到问题的输入就会传给chat_model进行响应，并把AI生成的回复返回。\n我们已经接近成功了，我们添加一个简单的命令行交互：\n检查是否作为主程序运行。 进入一个无限循环，提示用户输入问题或输入 ’exit’ 退出。 如果用户输入 ’exit’，打印 “再见” 并退出循环。 否则，调用 get_response_from_llm函数获取响应并打印。 if __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break response = get_response_from_llm(user_input) print(response) 最后检查一下你的完整代码可能看起来是这样子：\nfrom openai import OpenAI chat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) def get_response_from_llm(question): message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"user\", \"content\": question}, ] response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=message, temperature=0.7, ) response_str = response.choices[0].message.content return response_str if __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break response = get_response_from_llm(user_input) print(response) 很好，保存之后，我们关闭VSC并打开命令行窗口，我们将要运行这个脚本然后尝试与AI进行单次对话：\n在你的命令行窗口里输入以下命令但先不要按下回车：\n# 注意空格！！！！ python3+空格 然后在资源管理器里尝试把你刚刚写好保存的cyberai.py文件拖拽进你的命令行窗口，这一步操作主要是把这个文件的路径+文件名+扩展名一起告诉命令行好让它运行这个脚本，最后完整的命令应该是类似于这样子的：\npython3 /Volumes/path/path/cyberai.py 好的我们按下回车，如果一切顺利的话，应该会出现一个提示： （本脚本作者测试了能够正常运行，如果有任何问题请自行排错请谅解）\n输入问题或者请输入'exit'退出： 那么恭喜你，你成功了，尝试输入问题然后等待AI回复，例如：\n输入问题或者请输入'exit'退出：你可以做我的赛博伙伴吗？ 很抱歉，作为一个AI语言模型，我没有实体和情感，无法成为你的赛博伙伴。我只能为你提供语言上的交流和帮助。请尊重他人，不要发表不恰当的言论。 （这个AI中暑了，我们得赶快抢救一下……）\n到现在为止，你应该已经可以正常地运行这个简单的脚本，并与某个大模型进行简单的单次对话了。但是我们可以发现，这AI没有记忆啊，说了这一句忘了上一句，这不行啊。所以接下来我们就要实现LLM的上下文记忆。\n所谓上下文记忆，实际上实现的方法有很多，例如使用列表存储对话信息或者使用数据库进行永久存储等都可以。我们暂时使用最简单的列表来存储上下文消息，同时复现Langchain~~（屎山）~~曾经使用的三种上下文记忆*（这一部分后续的记忆章节会专门介绍）*。\n我们在刚刚的代码里添加一些东西来实现短期记忆：\n添加一个名字叫做chat_history的列表\nchat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) # 添加列表 chat_history = [] 然后我们在get_response_from_llm函数里面添加历史记录的载入部分：\ndef get_response_from_llm(question): # 添加输出便于直观看到列表里面是什么样子 print(chat_history) chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*4:-1]]) chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, # 在这里增加了一条消息用于展示上下文记忆 {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] # 添加输出便于直观看到传递给LLM的消息是什么样子 print(message) response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=message, temperature=0.7, ) response_str = response.choices[0].message.content return response_str 我们来了解一下这段代码：在这段代码中，chat_history_window 和 chat_history_prompt 是两个关键变量，它们用于构建聊天历史记录的字符串表示。\n首先，chat_history_window 通过列表推导式和字符串的 join 方法创建。列表推导式\n[f\"{role}: {content}\" for role, content in chat_history[-2*4:-1]] 会遍历 chat_history 列表的一个切片。这个切片 chat_history[-2*4:-1] 选择了 chat_history 列表的最后七个元素（从倒数第八个到倒数第二个）。对于每个元素（它是一个包含角色和内容的元组），列表推导式生成一个格式化的字符串 \"{role}: {content}\"。然后，\"\\n\".join(...) 将这些字符串用换行符 \\n 连接起来，形成一个多行字符串 chat_history_window。\n这样的话，我们就可以通过改变 -2*4 里面的这个数字 4，改变成任意数字，就可以控制上下文记忆的轮次了。比如你想让 AI 的记忆有 3 轮，那你就可以改成 [-7:-1]，因为一轮对话包含用户输入和机器人的回复条消息嘛，所以是 6 条消息。至于为什么要去掉倒数第一个消息呢，因为后续我们在主函数中，用户的当前输入（AI 还没来得及相应）的时候，就已经被记录到聊天历史了，这会和后面的 {\"role\": \"user\", \"content\": question} 重复了，没必要。\n接下来，chat_history_prompt 是一个包含聊天历史记录的完整字符串。它通过格式化字符串\nf\"Here is the chat history:\\n {chat_history_window}\" 创建，其中 chat_history_window 被插入到字符串中。这段代码的目的是将最近的聊天历史记录格式化为一个字符串，以便在后续的聊天请求中使用。这样可以为聊天模型提供上下文，使其能够生成更相关和连贯的响应。你可以把它理解为一种模板 + 变量的形式，达到类似于动态提示词的效果，也就是说，{chat_history_window} 里面的是变量，会一直变，而之前的内容是固定字符串，便于 LLM 理解这一部分是上下文，避免产生混淆。 多说一句，这里提到的格式化字符串在后续的提示词工程和动态提示词等相关应用中很有用，它让我们的Agent可以根据不同的条件得到最精准的信息，减少Token使用，提高成功率。\n最后，我们在主函数里增加上写文记录的操作，大概是这样：\nif __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break # 添加用户消息到消息列表 chat_history.append(('human', user_input)) response = get_response_from_llm(user_input) # 添加AI回复到消息列表 chat_history.append(('ai', response)) print(response) 完整的代码看起来是这样：\nfrom openai import OpenAI chat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) chat_history = [] def get_response_from_llm(question): print(chat_history) chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*4:-1]]) chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] print(message) response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=message, temperature=0.7, ) response_str = response.choices[0].message.content return response_str if __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break chat_history.append(('human', user_input)) response = get_response_from_llm(user_input) chat_history.append(('ai', response)) print(response) 希望你们可以成功运行代码！\n",
+  "wordCount" : "553",
+  "inLanguage": "en",
+  "datePublished": "2024-10-11T23:15:06-02:30",
+  "dateModified": "2024-10-11T23:15:06-02:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://blog.licometa.me/posts/cybermate2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Cybermate!",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://blog.licometa.me/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://blog.licometa.me/" accesskey="h" title="Cybermate! (Alt + H)">Cybermate!</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://blog.licometa.me/archives/" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      从零开始的赛博老婆！2 - 基础Python环境搭建&#43;接入大语言模型
+    </h1>
+    <div class="post-meta"><span title='2024-10-11 23:15:06 -0230 NDT'>October 11, 2024</span>&nbsp;·&nbsp;3 min
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#python%e7%8e%af%e5%a2%83%e4%b8%8e%e4%be%9d%e8%b5%96" aria-label="Python环境与依赖">Python环境与依赖</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#%e5%ae%89%e8%a3%85python%e7%8e%af%e5%a2%83%e6%88%96%e8%80%85%e5%ae%89%e8%a3%85anaconda%e7%8e%af%e5%a2%83%e7%ae%a1%e7%90%86%e5%99%a8" aria-label="安装python环境或者安装anaconda环境管理器">安装python环境或者安装anaconda环境管理器</a></li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e4%b8%80%e4%b8%aapython%e7%8e%af%e5%a2%83" aria-label="创建一个python环境">创建一个python环境</a></li>
+                <li>
+                    <a href="#%e6%bf%80%e6%b4%bb%e7%8e%af%e5%a2%83%e5%b9%b6%e5%ae%89%e8%a3%85%e4%be%9d%e8%b5%96" aria-label="激活环境并安装依赖">激活环境并安装依赖</a><ul>
+                        
+                <li>
+                    <a href="#%e6%bf%80%e6%b4%bb%e7%8e%af%e5%a2%83" aria-label="激活环境">激活环境</a></li>
+                <li>
+                    <a href="#%e5%ae%89%e8%a3%85%e7%9b%b8%e5%85%b3%e4%be%9d%e8%b5%96" aria-label="安装相关依赖">安装相关依赖</a></li></ul>
+                </li></ul>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e4%b8%80%e4%b8%aapython%e8%84%9a%e6%9c%ac" aria-label="创建一个python脚本">创建一个python脚本</a><ul>
+                        <ul>
+                        
+                <li>
+                    <a href="#%e5%87%86%e5%a4%87%e4%bd%a0%e7%9a%84open-ai-api" aria-label="准备你的Open AI API">准备你的Open AI API</a></li>
+                <li>
+                    <a href="#%e5%bc%80%e5%a7%8b%e5%86%99%e4%bb%a3%e7%a0%81" aria-label="开始写代码">开始写代码</a>
+                </li>
+            </ul>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="/images/104755143_p0_master1200.jpg" alt=""  />
+
+Pixiv ID: 104755143</p>
+<p>本文章开始我们逐步进行实战，本次为搭建python基本环境，然后接入大语言模型，以Open AI Chat GPT为例。</p>
+<h1 id="python环境与依赖">Python环境与依赖<a hidden class="anchor" aria-hidden="true" href="#python环境与依赖">#</a></h1>
+<p>当你想运行你的赛博伙伴，你的代码是需要依赖库运行的，本文章使用了Python基础库和openai等库。请注意，当你的电脑里的python环境里没有正确安装相应的依赖库，代码无法正常运行。</p>
+<p><em><strong>注：以下命令可能不适用于你的系统，请根据对应系统查询conda命令</strong></em></p>
+<h3 id="安装python环境或者安装anaconda环境管理器">安装python环境或者安装anaconda环境管理器<a hidden class="anchor" aria-hidden="true" href="#安装python环境或者安装anaconda环境管理器">#</a></h3>
+<p>请去<a href="https://www.python.org/downloads/">python官网</a>或者<a href="https://www.anaconda.com/download">anaconda官网</a>里安装软件，二者选其一即可。本文推荐使用anaconda，避免出现好多个环境互相冲突的情况。</p>
+<p>如果你使用ARM架构的系统,可以尝试使用MiniForge,这个项目对ARM Python环境有一些优化,还是不错的。</p>
+<p><em><strong>请注意，安装任意软件的时候请务必将其添加到系统变量或者系统路径中（大佬除外），否则无法使用CMD正常运行脚本，具体安装和排错等问题恕不在本教程范围内</strong></em></p>
+<p>一般选择默认安装即可，安装好anaconda之后，，用打开你的CMD命令行窗口，运行以下命令检查conda是否安装成功：</p>
+<pre tabindex="0"><code>conda -V 
+# 或者
+conda --version
+</code></pre><p>如果出现“没有此命令”则安装不正常，请自行排错。</p>
+<pre tabindex="0"><code># 更新conda
+conda update conda
+# 更新所有包
+conda update --all
+</code></pre><h3 id="创建一个python环境">创建一个python环境<a hidden class="anchor" aria-hidden="true" href="#创建一个python环境">#</a></h3>
+<p><em><strong>注：本教程建议使用python3.11及以上版本，之前的版本没有经过测试，请尽量保证最新版本。</strong></em></p>
+<p>我们给我们的赛博伙伴项目创建一个虚拟环境，以后我们就使用这个环境运行和赛博伙伴相关的代码，这样后续你统计依赖列表打包Docker镜像的时候很方便。</p>
+<p>使用此命令创建一个新的环境：</p>
+<pre tabindex="0"><code>conda create -n env_name
+</code></pre><p>例如：</p>
+<pre tabindex="0"><code>conda create -n ai
+</code></pre><h3 id="激活环境并安装依赖">激活环境并安装依赖<a hidden class="anchor" aria-hidden="true" href="#激活环境并安装依赖">#</a></h3>
+<h4 id="激活环境">激活环境<a hidden class="anchor" aria-hidden="true" href="#激活环境">#</a></h4>
+<p>使用以下命令激活特定的环境：</p>
+<pre tabindex="0"><code>conda activate env_name
+</code></pre><p>例如我们刚刚创建了一个名为<code>ai</code>的环境，现在我们要激活它：</p>
+<pre tabindex="0"><code>conda activate ai
+</code></pre><p>激活之后，我们所有的操作使用的就是这个环境里已经安装的包和依赖了，你会发现命令行的开头会有你当前的环境名称。每次你打开命令行，都检查一下是不是你所需要的环境，当然你也可以设置你的默认环境。</p>
+<p>你可以使用这个命令：</p>
+<pre tabindex="0"><code>conda env list 
+# 或
+conda info --envs 
+# 查看存在哪些虚拟环境
+</code></pre><p>你可能要用到这个命令关闭这个环境（但是先不要关闭，我们还要继续使用这个环境）：</p>
+<pre tabindex="0"><code>conda deactivate env_name
+# 例如关闭ai这个环境，关闭之后就是默认环境了
+conda deactivate ai
+</code></pre><h4 id="安装相关依赖">安装相关依赖<a hidden class="anchor" aria-hidden="true" href="#安装相关依赖">#</a></h4>
+<p>现在激活我们刚刚创建的环境，然后仍然是在CMD里<em><strong>依次</strong></em>输入此命令安装相关依赖：</p>
+<pre tabindex="0"><code># Openai官方的python库
+pip install openai
+</code></pre><p>安装完成后我们准备进入下一步。</p>
+<p>相关的官方文档比较推荐，官方的文档是准确且值得反复推敲的。</p>
+<p><a href="https://platform.openai.com/docs/introduction">openai官方文档</a></p>
+<h1 id="创建一个python脚本">创建一个python脚本<a hidden class="anchor" aria-hidden="true" href="#创建一个python脚本">#</a></h1>
+<h3 id="准备你的open-ai-api">准备你的Open AI API<a hidden class="anchor" aria-hidden="true" href="#准备你的open-ai-api">#</a></h3>
+<p>准备好你的能用的API token并妥善保存</p>
+<h3 id="开始写代码">开始写代码<a hidden class="anchor" aria-hidden="true" href="#开始写代码">#</a></h3>
+<p>有人喜欢用脚本，有人喜欢用notebook交互式python，因人而异，喜欢啥用啥。我个人喜欢用脚本，notebook的用法请自行学习。</p>
+<p>建议安装并使用Visual Studio Code这个软件，大佬随意。不建议使用某自主研发会员制CEC IDE（因为穷）。使用VSC创建一个<code>cyberai.py</code>文件，保存在你能找得到的地方，然后我们开始输入代码：</p>
+<p>首先导入之前安装好的库中我们需要的部分,这个是Openai官方的python SDK库,可以用来调用兼容的API。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span></code></pre></div><p>然后我们开始基础设置,这个就相当于连接到运行LLM的服务器一样：</p>
+<ol>
+<li><code>base_url</code>是你的接入点，如果你使用的是非官方的第三方中转API，或者你使用了反向代理，那么你可能会用到这个，在双引号中间填入你的接入点链接，例如<code>https://api.openai.com/v1/chat/completions</code>。如果你可以正常连接到官方的接入点，这一行就可以删去不用。</li>
+<li><code>api_key</code>是你的API Token，在双引号里填写你的api。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span></code></pre></div><p>好的，我们已经完成一半了，我们将简单定义一个函数并在这个函数里调用我们刚刚设置好的模型：</p>
+<p>这个函数接受一个问题 <code>question</code>(字符串)作为参数。</p>
+<p>消息列表<code>message</code>是定义一条将要发送给LLM后端的消息体，其中包含系统消息（设定角色为猫娘并要求输出中文）和用户消息（用户输入的问题）。一般的格式如下,当然不同的LLM支持的消息体格式可能略有不同,例如写本文时,Claude的API就必须User开头,具体请查询对应API Doc。</p>
+<p>我们调用 <code>chat_model.chat.completions.create</code>方法生成对话响应，指定模型为 <code>gpt-4o-mini</code>，并设置温度参数为 0.7。</p>
+<p>最后我们从响应中提取生成的文本内容并返回。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>                model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>                messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>                temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span></code></pre></div><p>这个函数收到问题的输入就会传给chat_model进行响应，并把AI生成的回复返回。</p>
+<p>我们已经接近成功了，我们添加一个简单的命令行交互：</p>
+<ol>
+<li>检查是否作为主程序运行。</li>
+<li>进入一个无限循环，提示用户输入问题或输入 &rsquo;exit&rsquo; 退出。</li>
+<li>如果用户输入 &rsquo;exit&rsquo;，打印 &ldquo;再见&rdquo; 并退出循环。</li>
+<li>否则，调用 <code>get_response_from_llm</code>函数获取响应并打印。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><p>最后检查一下你的完整代码可能看起来是这样子：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>                model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>                messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>                temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><p>很好，保存之后，我们关闭VSC并打开命令行窗口，我们将要运行这个脚本然后尝试与AI进行单次对话：</p>
+<p>在你的命令行窗口里输入以下命令但先不要按下回车：</p>
+<pre tabindex="0"><code># 注意空格！！！！
+python3+空格
+</code></pre><p>然后在资源管理器里尝试把你刚刚写好保存的<code>cyberai.py</code>文件拖拽进你的命令行窗口，这一步操作主要是把这个文件的路径+文件名+扩展名一起告诉命令行好让它运行这个脚本，最后完整的命令应该是类似于这样子的：</p>
+<pre tabindex="0"><code>python3 /Volumes/path/path/cyberai.py
+</code></pre><p>好的我们按下回车，如果一切顺利的话，应该会出现一个提示：
+（本脚本作者测试了能够正常运行，如果有任何问题请自行排错请谅解）</p>
+<pre tabindex="0"><code>输入问题或者请输入&#39;exit&#39;退出：
+</code></pre><p>那么恭喜你，你成功了，尝试输入问题然后等待AI回复，例如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>输入问题或者请输入<span style="color:#e6db74">&#39;exit&#39;</span>退出<span style="color:#960050;background-color:#1e0010">：</span>你可以做我的赛博伙伴吗<span style="color:#960050;background-color:#1e0010">？</span>
+</span></span><span style="display:flex;"><span>很抱歉<span style="color:#960050;background-color:#1e0010">，</span>作为一个AI语言模型<span style="color:#960050;background-color:#1e0010">，</span>我没有实体和情感<span style="color:#960050;background-color:#1e0010">，</span>无法成为你的赛博伙伴<span style="color:#960050;background-color:#1e0010">。</span>我只能为你提供语言上的交流和帮助<span style="color:#960050;background-color:#1e0010">。</span>请尊重他人<span style="color:#960050;background-color:#1e0010">，</span>不要发表不恰当的言论<span style="color:#960050;background-color:#1e0010">。</span>
+</span></span></code></pre></div><p>（这个AI中暑了，我们得赶快抢救一下……）</p>
+<p>到现在为止，你应该已经可以正常地运行这个简单的脚本，并与某个大模型进行简单的单次对话了。但是我们可以发现，这AI没有记忆啊，说了这一句忘了上一句，这不行啊。所以接下来我们就要实现LLM的上下文记忆。</p>
+<p>所谓上下文记忆，实际上实现的方法有很多，例如使用列表存储对话信息或者使用数据库进行永久存储等都可以。我们暂时使用最简单的列表来存储上下文消息，同时复现Langchain~~（屎山）~~曾经使用的三种上下文记忆*（这一部分后续的记忆章节会专门介绍）*。</p>
+<p>我们在刚刚的代码里添加一些东西来实现短期记忆：</p>
+<p>添加一个名字叫做<code>chat_history</code>的列表</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 添加列表</span>
+</span></span><span style="display:flex;"><span>chat_history <span style="color:#f92672">=</span> []
+</span></span></code></pre></div><p>然后我们在<code>get_response_from_llm</code>函数里面添加历史记录的载入部分：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  	<span style="color:#75715e"># 添加输出便于直观看到列表里面是什么样子</span>
+</span></span><span style="display:flex;"><span>    print(chat_history)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>      	<span style="color:#75715e"># 在这里增加了一条消息用于展示上下文记忆</span>
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>		<span style="color:#75715e"># 添加输出便于直观看到传递给LLM的消息是什么样子</span>
+</span></span><span style="display:flex;"><span>    print(message)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>                model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>                messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>                temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span></code></pre></div><p>我们来了解一下这段代码：在这段代码中，<code>chat_history_window</code> 和 <code>chat_history_prompt</code> 是两个关键变量，它们用于构建聊天历史记录的字符串表示。</p>
+<p>首先，<code>chat_history_window</code> 通过列表推导式和字符串的 <code>join</code> 方法创建。列表推导式</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>[<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]]
+</span></span></code></pre></div><p>会遍历 <code>chat_history</code> 列表的一个切片。这个切片 <code>chat_history[-2*4:-1]</code> 选择了 <code>chat_history</code> 列表的最后七个元素（从倒数第八个到倒数第二个）。对于每个元素（它是一个包含角色和内容的元组），列表推导式生成一个格式化的字符串 <code>&quot;{role}: {content}&quot;</code>。然后，<code>&quot;\n&quot;.join(...)</code> 将这些字符串用换行符 <code>\n</code> 连接起来，形成一个多行字符串 <code>chat_history_window</code>。</p>
+<p>这样的话，我们就可以通过改变 <code>-2*4</code> 里面的这个数字 <code>4</code>，改变成任意数字，就可以控制上下文记忆的轮次了。比如你想让 AI 的记忆有 3 轮，那你就可以改成 <code>[-7:-1]</code>，因为一轮对话包含用户输入和机器人的回复条消息嘛，所以是 6 条消息。至于为什么要去掉倒数第一个消息呢，因为后续我们在主函数中，用户的当前输入（AI 还没来得及相应）的时候，就已经被记录到聊天历史了，这会和后面的 <code>{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: question}</code> 重复了，没必要。</p>
+<p>接下来，<code>chat_history_prompt</code> 是一个包含聊天历史记录的完整字符串。它通过格式化字符串</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><p>创建，其中 <code>chat_history_window</code> 被插入到字符串中。这段代码的目的是将最近的聊天历史记录格式化为一个字符串，以便在后续的聊天请求中使用。这样可以为聊天模型提供上下文，使其能够生成更相关和连贯的响应。你可以把它理解为一种模板 + 变量的形式，达到类似于动态提示词的效果，也就是说，<code>{chat_history_window}</code> 里面的是变量，会一直变，而之前的内容是固定字符串，便于 LLM 理解这一部分是上下文，避免产生混淆。
+多说一句，这里提到的<em><strong>格式化字符串</strong></em>在后续的<strong>提示词工程</strong>和<strong>动态提示词</strong>等相关应用中很有用，它让我们的Agent可以根据不同的条件得到最精准的信息，减少Token使用，提高成功率。</p>
+<p>最后，我们在主函数里增加上写文记录的操作，大概是这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 添加用户消息到消息列表</span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;human&#39;</span>, user_input))
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 添加AI回复到消息列表</span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;ai&#39;</span>, response))
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><p>完整的代码看起来是这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(chat_history)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(message)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>                model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>                messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>                temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;human&#39;</span>, user_input))
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;ai&#39;</span>, response))
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><p>希望你们可以成功运行代码！</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://blog.licometa.me/">Cybermate!</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

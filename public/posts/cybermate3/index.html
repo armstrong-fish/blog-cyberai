@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>从零开始的赛博老婆！3 - TTS浅谈与实践 | Cybermate!</title>
+<meta name="keywords" content="">
+<meta name="description" content="
+
+PIXIV: 71888962 @Yuuri
+TTS浅谈
+TTS（Text To Speech）是语音合成（Speech synthesis）的一个分支，文本转语音（TTS）系统将正常语言文本转换为语音。TTS系统对于提高交互性有帮助，最近技术发展迅猛，TTS项目百花齐放。
+从RVC的实时变声和动态语调优化，再到效果优秀的VITS，生成对抗网络（GAN）的加持使其声音比以前自然了很多。随着SO-VITS强大的声调控制能力的实现，优秀数据集加持下的Diff-SVC，虚拟歌姬的声音媲美真人，但也随之带来了一系列问题。在我浅显的认知中，我对语音合成还停留在初音未来那个时代，但是时代变化如此之快。目前TTS大有互相融合的趋势，例如fish-diffusion或者Fishaudio旗下的其他项目等，都有不小的进步。
+开源项目如此繁盛，商用发展当然也不落后。看向商业阵营，各大公司都有其绝活。比如Acapela Group专门搞已故名人的TTS，这非常有特色。还有众多公司专注于高质量或情感丰富的TTS、定制声音等。而在商用TTS行业中，Azure TTS可以说是龙头，我们本篇文章也会使用微软的免费EdgeTTS服务作为示例。
+这里有一些相关的项目链接：
+
+Fish Audio
+GPT-SoVITS
+Retrieval-based-Voice-Conversion-WebUI
+
+这里还有两个哔哩哔哩up主，专注于音乐翻唱相关的，也推荐参考：
+
+领航员未鸟
+
+东洋雪莲也比较有实力，但似乎不公开分享很多技术细节，故仅作介绍。
+注意，现在互联网上有非常多的TTS引擎，本文章仅使用较为稳定的Edge-TTS，初衷是用于实际应用。如果你需要完全本地使用TTS或者为了好玩个性化训练声音和特殊模型，本教程不适用，请移步到其他个性化TTS炼丹教程，比如GPT-SO-VITS等等。
+Edge TTS
+TTS接受文字输入，然后输出音频。对于Edge TTS的Python版本，它实际上是通过网络请求工作的。因此，它可以很好地在边缘计算平台上运行，因为音频合成是在云端计算并返回给你的。我们使用的是Edge TTS Python库，这里还有GitHub的项目网址：edge-tts。
+安装Edge TTS
+首先安装：
+pip install edge-tts
+Edge TTS有两种工作方式，一种是使用命令行交互的方式，如果你只想使用命令模式，你可以使用pipx安装它（来自官网的教程）：
+pipx install edge-tts
+命令行模式我们不用，这里一笔带过。
+Edge TTS使用
+首先创建一个Edgetts.py文件，然后导入所需要的模块：
+# 导入需要的库
+import asyncio
+import edge_tts
+import os
+然后初始化TTS引擎。为了获取语言和声音的可选项，可以在命令行窗口输入命令来获取支持的列表：
+edge-tts --list-voices
+你会发现输出了一大坨列表，这里就不放出来了。选择需要的NAME然后继续写初始化代码：
+# 设置要转化为语音的文本
+TEXT = &#34;你好啊，这里是lico！欢迎来到lico的元宇宙！&#34;  
+# 设置语音的语言和声音，注意这个名字是大小写敏感的
+VOICE = &#34;zh-CN-XiaoyiNeural&#34; 
+# 设置输出文件的路径，文件将保存在脚本所在的文件夹中
+OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), &#34;test.mp3&#34;)
+使用edgetts的函数进行语音生成。注意，异步运行：
+# 定义主函数
+async def _main() -&gt; None:  
+    # 创建一个Communicate对象，用于将文本转化为语音
+    communicate = edge_tts.Communicate(TEXT, VOICE)  
+    # 将语音保存到文件中
+    await communicate.save(OUTPUT_FILE)  
+最后加上主函数，整体的代码如下：">
+<meta name="author" content="">
+<link rel="canonical" href="https://blog.licometa.me/posts/cybermate3/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2335395c2bfc3803c675c5051856bb74c664fce999ae87dcedc812486409e3c0.css" integrity="sha256-IzU5XCv8OAPGdcUFGFa7dMZk/OmZrofc7cgSSGQJ48A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://blog.licometa.me/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://blog.licometa.me/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://blog.licometa.me/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://blog.licometa.me/apple-touch-icon.png">
+<link rel="mask-icon" href="https://blog.licometa.me/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://blog.licometa.me/posts/cybermate3/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="从零开始的赛博老婆！3 - TTS浅谈与实践" />
+<meta property="og:description" content="
+
+PIXIV: 71888962 @Yuuri
+TTS浅谈
+TTS（Text To Speech）是语音合成（Speech synthesis）的一个分支，文本转语音（TTS）系统将正常语言文本转换为语音。TTS系统对于提高交互性有帮助，最近技术发展迅猛，TTS项目百花齐放。
+从RVC的实时变声和动态语调优化，再到效果优秀的VITS，生成对抗网络（GAN）的加持使其声音比以前自然了很多。随着SO-VITS强大的声调控制能力的实现，优秀数据集加持下的Diff-SVC，虚拟歌姬的声音媲美真人，但也随之带来了一系列问题。在我浅显的认知中，我对语音合成还停留在初音未来那个时代，但是时代变化如此之快。目前TTS大有互相融合的趋势，例如fish-diffusion或者Fishaudio旗下的其他项目等，都有不小的进步。
+开源项目如此繁盛，商用发展当然也不落后。看向商业阵营，各大公司都有其绝活。比如Acapela Group专门搞已故名人的TTS，这非常有特色。还有众多公司专注于高质量或情感丰富的TTS、定制声音等。而在商用TTS行业中，Azure TTS可以说是龙头，我们本篇文章也会使用微软的免费EdgeTTS服务作为示例。
+这里有一些相关的项目链接：
+
+Fish Audio
+GPT-SoVITS
+Retrieval-based-Voice-Conversion-WebUI
+
+这里还有两个哔哩哔哩up主，专注于音乐翻唱相关的，也推荐参考：
+
+领航员未鸟
+
+东洋雪莲也比较有实力，但似乎不公开分享很多技术细节，故仅作介绍。
+注意，现在互联网上有非常多的TTS引擎，本文章仅使用较为稳定的Edge-TTS，初衷是用于实际应用。如果你需要完全本地使用TTS或者为了好玩个性化训练声音和特殊模型，本教程不适用，请移步到其他个性化TTS炼丹教程，比如GPT-SO-VITS等等。
+Edge TTS
+TTS接受文字输入，然后输出音频。对于Edge TTS的Python版本，它实际上是通过网络请求工作的。因此，它可以很好地在边缘计算平台上运行，因为音频合成是在云端计算并返回给你的。我们使用的是Edge TTS Python库，这里还有GitHub的项目网址：edge-tts。
+安装Edge TTS
+首先安装：
+pip install edge-tts
+Edge TTS有两种工作方式，一种是使用命令行交互的方式，如果你只想使用命令模式，你可以使用pipx安装它（来自官网的教程）：
+pipx install edge-tts
+命令行模式我们不用，这里一笔带过。
+Edge TTS使用
+首先创建一个Edgetts.py文件，然后导入所需要的模块：
+# 导入需要的库
+import asyncio
+import edge_tts
+import os
+然后初始化TTS引擎。为了获取语言和声音的可选项，可以在命令行窗口输入命令来获取支持的列表：
+edge-tts --list-voices
+你会发现输出了一大坨列表，这里就不放出来了。选择需要的NAME然后继续写初始化代码：
+# 设置要转化为语音的文本
+TEXT = &#34;你好啊，这里是lico！欢迎来到lico的元宇宙！&#34;  
+# 设置语音的语言和声音，注意这个名字是大小写敏感的
+VOICE = &#34;zh-CN-XiaoyiNeural&#34; 
+# 设置输出文件的路径，文件将保存在脚本所在的文件夹中
+OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), &#34;test.mp3&#34;)
+使用edgetts的函数进行语音生成。注意，异步运行：
+# 定义主函数
+async def _main() -&gt; None:  
+    # 创建一个Communicate对象，用于将文本转化为语音
+    communicate = edge_tts.Communicate(TEXT, VOICE)  
+    # 将语音保存到文件中
+    await communicate.save(OUTPUT_FILE)  
+最后加上主函数，整体的代码如下：" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.licometa.me/posts/cybermate3/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-10-11T23:22:21-02:30" />
+<meta property="article:modified_time" content="2024-10-11T23:22:21-02:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="从零开始的赛博老婆！3 - TTS浅谈与实践"/>
+<meta name="twitter:description" content="
+
+PIXIV: 71888962 @Yuuri
+TTS浅谈
+TTS（Text To Speech）是语音合成（Speech synthesis）的一个分支，文本转语音（TTS）系统将正常语言文本转换为语音。TTS系统对于提高交互性有帮助，最近技术发展迅猛，TTS项目百花齐放。
+从RVC的实时变声和动态语调优化，再到效果优秀的VITS，生成对抗网络（GAN）的加持使其声音比以前自然了很多。随着SO-VITS强大的声调控制能力的实现，优秀数据集加持下的Diff-SVC，虚拟歌姬的声音媲美真人，但也随之带来了一系列问题。在我浅显的认知中，我对语音合成还停留在初音未来那个时代，但是时代变化如此之快。目前TTS大有互相融合的趋势，例如fish-diffusion或者Fishaudio旗下的其他项目等，都有不小的进步。
+开源项目如此繁盛，商用发展当然也不落后。看向商业阵营，各大公司都有其绝活。比如Acapela Group专门搞已故名人的TTS，这非常有特色。还有众多公司专注于高质量或情感丰富的TTS、定制声音等。而在商用TTS行业中，Azure TTS可以说是龙头，我们本篇文章也会使用微软的免费EdgeTTS服务作为示例。
+这里有一些相关的项目链接：
+
+Fish Audio
+GPT-SoVITS
+Retrieval-based-Voice-Conversion-WebUI
+
+这里还有两个哔哩哔哩up主，专注于音乐翻唱相关的，也推荐参考：
+
+领航员未鸟
+
+东洋雪莲也比较有实力，但似乎不公开分享很多技术细节，故仅作介绍。
+注意，现在互联网上有非常多的TTS引擎，本文章仅使用较为稳定的Edge-TTS，初衷是用于实际应用。如果你需要完全本地使用TTS或者为了好玩个性化训练声音和特殊模型，本教程不适用，请移步到其他个性化TTS炼丹教程，比如GPT-SO-VITS等等。
+Edge TTS
+TTS接受文字输入，然后输出音频。对于Edge TTS的Python版本，它实际上是通过网络请求工作的。因此，它可以很好地在边缘计算平台上运行，因为音频合成是在云端计算并返回给你的。我们使用的是Edge TTS Python库，这里还有GitHub的项目网址：edge-tts。
+安装Edge TTS
+首先安装：
+pip install edge-tts
+Edge TTS有两种工作方式，一种是使用命令行交互的方式，如果你只想使用命令模式，你可以使用pipx安装它（来自官网的教程）：
+pipx install edge-tts
+命令行模式我们不用，这里一笔带过。
+Edge TTS使用
+首先创建一个Edgetts.py文件，然后导入所需要的模块：
+# 导入需要的库
+import asyncio
+import edge_tts
+import os
+然后初始化TTS引擎。为了获取语言和声音的可选项，可以在命令行窗口输入命令来获取支持的列表：
+edge-tts --list-voices
+你会发现输出了一大坨列表，这里就不放出来了。选择需要的NAME然后继续写初始化代码：
+# 设置要转化为语音的文本
+TEXT = &#34;你好啊，这里是lico！欢迎来到lico的元宇宙！&#34;  
+# 设置语音的语言和声音，注意这个名字是大小写敏感的
+VOICE = &#34;zh-CN-XiaoyiNeural&#34; 
+# 设置输出文件的路径，文件将保存在脚本所在的文件夹中
+OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), &#34;test.mp3&#34;)
+使用edgetts的函数进行语音生成。注意，异步运行：
+# 定义主函数
+async def _main() -&gt; None:  
+    # 创建一个Communicate对象，用于将文本转化为语音
+    communicate = edge_tts.Communicate(TEXT, VOICE)  
+    # 将语音保存到文件中
+    await communicate.save(OUTPUT_FILE)  
+最后加上主函数，整体的代码如下："/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://blog.licometa.me/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "从零开始的赛博老婆！3 - TTS浅谈与实践",
+      "item": "https://blog.licometa.me/posts/cybermate3/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "从零开始的赛博老婆！3 - TTS浅谈与实践",
+  "name": "从零开始的赛博老婆！3 - TTS浅谈与实践",
+  "description": " PIXIV: 71888962 @Yuuri\nTTS浅谈 TTS（Text To Speech）是语音合成（Speech synthesis）的一个分支，文本转语音（TTS）系统将正常语言文本转换为语音。TTS系统对于提高交互性有帮助，最近技术发展迅猛，TTS项目百花齐放。\n从RVC的实时变声和动态语调优化，再到效果优秀的VITS，生成对抗网络（GAN）的加持使其声音比以前自然了很多。随着SO-VITS强大的声调控制能力的实现，优秀数据集加持下的Diff-SVC，虚拟歌姬的声音媲美真人，但也随之带来了一系列问题。在我浅显的认知中，我对语音合成还停留在初音未来那个时代，但是时代变化如此之快。目前TTS大有互相融合的趋势，例如fish-diffusion或者Fishaudio旗下的其他项目等，都有不小的进步。\n开源项目如此繁盛，商用发展当然也不落后。看向商业阵营，各大公司都有其绝活。比如Acapela Group专门搞已故名人的TTS，这非常有特色。还有众多公司专注于高质量或情感丰富的TTS、定制声音等。而在商用TTS行业中，Azure TTS可以说是龙头，我们本篇文章也会使用微软的免费EdgeTTS服务作为示例。\n这里有一些相关的项目链接：\nFish Audio GPT-SoVITS Retrieval-based-Voice-Conversion-WebUI 这里还有两个哔哩哔哩up主，专注于音乐翻唱相关的，也推荐参考：\n领航员未鸟 东洋雪莲也比较有实力，但似乎不公开分享很多技术细节，故仅作介绍。\n注意，现在互联网上有非常多的TTS引擎，本文章仅使用较为稳定的Edge-TTS，初衷是用于实际应用。如果你需要完全本地使用TTS或者为了好玩个性化训练声音和特殊模型，本教程不适用，请移步到其他个性化TTS炼丹教程，比如GPT-SO-VITS等等。\nEdge TTS TTS接受文字输入，然后输出音频。对于Edge TTS的Python版本，它实际上是通过网络请求工作的。因此，它可以很好地在边缘计算平台上运行，因为音频合成是在云端计算并返回给你的。我们使用的是Edge TTS Python库，这里还有GitHub的项目网址：edge-tts。\n安装Edge TTS 首先安装：\npip install edge-tts Edge TTS有两种工作方式，一种是使用命令行交互的方式，如果你只想使用命令模式，你可以使用pipx安装它（来自官网的教程）：\npipx install edge-tts 命令行模式我们不用，这里一笔带过。\nEdge TTS使用 首先创建一个Edgetts.py文件，然后导入所需要的模块：\n# 导入需要的库 import asyncio import edge_tts import os 然后初始化TTS引擎。为了获取语言和声音的可选项，可以在命令行窗口输入命令来获取支持的列表：\nedge-tts --list-voices 你会发现输出了一大坨列表，这里就不放出来了。选择需要的NAME然后继续写初始化代码：\n# 设置要转化为语音的文本 TEXT = \u0026#34;你好啊，这里是lico！欢迎来到lico的元宇宙！\u0026#34; # 设置语音的语言和声音，注意这个名字是大小写敏感的 VOICE = \u0026#34;zh-CN-XiaoyiNeural\u0026#34; # 设置输出文件的路径，文件将保存在脚本所在的文件夹中 OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), \u0026#34;test.mp3\u0026#34;) 使用edgetts的函数进行语音生成。注意，异步运行：\n# 定义主函数 async def _main() -\u0026gt; None: # 创建一个Communicate对象，用于将文本转化为语音 communicate = edge_tts.Communicate(TEXT, VOICE) # 将语音保存到文件中 await communicate.save(OUTPUT_FILE) 最后加上主函数，整体的代码如下：\n",
+  "keywords": [
+    
+  ],
+  "articleBody": " PIXIV: 71888962 @Yuuri\nTTS浅谈 TTS（Text To Speech）是语音合成（Speech synthesis）的一个分支，文本转语音（TTS）系统将正常语言文本转换为语音。TTS系统对于提高交互性有帮助，最近技术发展迅猛，TTS项目百花齐放。\n从RVC的实时变声和动态语调优化，再到效果优秀的VITS，生成对抗网络（GAN）的加持使其声音比以前自然了很多。随着SO-VITS强大的声调控制能力的实现，优秀数据集加持下的Diff-SVC，虚拟歌姬的声音媲美真人，但也随之带来了一系列问题。在我浅显的认知中，我对语音合成还停留在初音未来那个时代，但是时代变化如此之快。目前TTS大有互相融合的趋势，例如fish-diffusion或者Fishaudio旗下的其他项目等，都有不小的进步。\n开源项目如此繁盛，商用发展当然也不落后。看向商业阵营，各大公司都有其绝活。比如Acapela Group专门搞已故名人的TTS，这非常有特色。还有众多公司专注于高质量或情感丰富的TTS、定制声音等。而在商用TTS行业中，Azure TTS可以说是龙头，我们本篇文章也会使用微软的免费EdgeTTS服务作为示例。\n这里有一些相关的项目链接：\nFish Audio GPT-SoVITS Retrieval-based-Voice-Conversion-WebUI 这里还有两个哔哩哔哩up主，专注于音乐翻唱相关的，也推荐参考：\n领航员未鸟 东洋雪莲也比较有实力，但似乎不公开分享很多技术细节，故仅作介绍。\n注意，现在互联网上有非常多的TTS引擎，本文章仅使用较为稳定的Edge-TTS，初衷是用于实际应用。如果你需要完全本地使用TTS或者为了好玩个性化训练声音和特殊模型，本教程不适用，请移步到其他个性化TTS炼丹教程，比如GPT-SO-VITS等等。\nEdge TTS TTS接受文字输入，然后输出音频。对于Edge TTS的Python版本，它实际上是通过网络请求工作的。因此，它可以很好地在边缘计算平台上运行，因为音频合成是在云端计算并返回给你的。我们使用的是Edge TTS Python库，这里还有GitHub的项目网址：edge-tts。\n安装Edge TTS 首先安装：\npip install edge-tts Edge TTS有两种工作方式，一种是使用命令行交互的方式，如果你只想使用命令模式，你可以使用pipx安装它（来自官网的教程）：\npipx install edge-tts 命令行模式我们不用，这里一笔带过。\nEdge TTS使用 首先创建一个Edgetts.py文件，然后导入所需要的模块：\n# 导入需要的库 import asyncio import edge_tts import os 然后初始化TTS引擎。为了获取语言和声音的可选项，可以在命令行窗口输入命令来获取支持的列表：\nedge-tts --list-voices 你会发现输出了一大坨列表，这里就不放出来了。选择需要的NAME然后继续写初始化代码：\n# 设置要转化为语音的文本 TEXT = \"你好啊，这里是lico！欢迎来到lico的元宇宙！\" # 设置语音的语言和声音，注意这个名字是大小写敏感的 VOICE = \"zh-CN-XiaoyiNeural\" # 设置输出文件的路径，文件将保存在脚本所在的文件夹中 OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), \"test.mp3\") 使用edgetts的函数进行语音生成。注意，异步运行：\n# 定义主函数 async def _main() -\u003e None: # 创建一个Communicate对象，用于将文本转化为语音 communicate = edge_tts.Communicate(TEXT, VOICE) # 将语音保存到文件中 await communicate.save(OUTPUT_FILE) 最后加上主函数，整体的代码如下：\n# 导入需要的库 import asyncio import edge_tts import os # 设置要转化为语音的文本 TEXT = \"你好啊，这里是lico！欢迎来到lico的元宇宙！\" # 设置语音的语言和声音 VOICE = \"zh-CN-XiaoyiNeural\" # 设置输出文件的路径，文件将保存在脚本所在的文件夹中 OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), \"test.mp3\") # 定义主函数 async def _main() -\u003e None: # 创建一个Communicate对象，用于将文本转化为语音 communicate = edge_tts.Communicate(TEXT, VOICE) # 将语音保存到文件中 await communicate.save(OUTPUT_FILE) # 如果这个脚本是直接运行的，而不是被导入的，那么就运行主函数 if __name__ == \"__main__\": asyncio.run(_main()) 在命令行运行之后，你就会发现脚本旁边生成了一个test.mp3，这就是生成的语音，你可以尝试在不社会性死亡的情况下播放或者修改成更社死的文本。\nEdge TTS还提供了流式生成的选项，这里不过多叙述，因为流式仅指输出，输入是没办法流式的，因为需要对整个文本进行音调和音素的规划，不过我们还是有机会解决这个问题，后续有机会再写吧。\n# 官方的流式生成的示例 async def amain() -\u003e None: \"\"\"Main function\"\"\" communicate = edge_tts.Communicate(TEXT, VOICE) with open(OUTPUT_FILE, \"wb\") as file: async for chunk in communicate.stream(): if chunk[\"type\"] == \"audio\": file.write(chunk[\"data\"]) elif chunk[\"type\"] == \"WordBoundary\": print(f\"WordBoundary: {chunk}\") LLM与TTS的结合 我们接下来尝试给我们上次的代码加上TTS语音输出，不过在此之前，我们需要先把TTS脚本改一下，让它变成一个函数，这样我们需要的时候调用它就好了。\n我们想要使用命令行交互，并且能够播放声音。考虑到多平台的兼容性，我们安装一个库pygame：\npip install pygame 然后我们修改之前的脚本，试试能不能播放：\n# 导入需要的库 import asyncio import edge_tts import os import pygame # 设置要转化为语音的文本 TEXT = \"你好啊，这里是lico！欢迎来到lico的元宇宙！\" # 设置语音的语言和声音 VOICE = \"zh-CN-XiaoyiNeural\" # 设置输出文件的路径，文件将保存在脚本所在的文件夹中 OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), \"test.mp3\") # 定义主函数 async def _main() -\u003e None: # 创建一个Communicate对象，用于将文本转化为语音 communicate = edge_tts.Communicate(TEXT, VOICE) # 将语音保存到文件中 await communicate.save(OUTPUT_FILE) print(f\"文件已保存到: {OUTPUT_FILE}\") # 检查文件是否存在 if not os.path.exists(OUTPUT_FILE): print(\"错误: 文件未生成\") return # 检查文件大小 if os.path.getsize(OUTPUT_FILE) == 0: print(\"错误: 文件大小为0\") return # 初始化pygame混音器 pygame.mixer.init() # 加载音频文件 pygame.mixer.music.load(OUTPUT_FILE) # 播放音频文件 pygame.mixer.music.play() # 等待音频播放结束 while pygame.mixer.music.get_busy(): await asyncio.sleep(1) # 如果这个脚本是直接运行的，而不是被导入的，那么就运行主函数 if __name__ == \"__main__\": asyncio.run(_main()) 如果你成功地运行了代码，TTS的声音会通过默认的扬声器播放出来。由于第一次使用Pygame会有一定的载入时间，因此运行脚本后可能要等几秒才会播放出声音。\n现在我们有了音频播放函数了，我们可以把这个函数和我们之前的函数合在一起，达到TTS和文字同时交互的效果，整体的代码看起来是这样：\nimport asyncio # 导入异步IO模块 import edge_tts # 导入edge_tts模块，用于文本转语音 import os # 导入os模块，用于文件路径操作 import pygame # 导入pygame模块，用于音频播放 from openai import OpenAI # 导入OpenAI模块，用于与OpenAI的API交互 # 初始化OpenAI的聊天模型 chat_model = OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key=\"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) # 设置语音的语言和声音 VOICE = \"zh-CN-XiaoyiNeural\" # 设置输出文件的路径，文件将保存在脚本所在的文件夹中，每一次生成后会覆盖之前的，仅用来测试 OUTPUT_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), \"test.mp3\") # 设置聊天记录列表 chat_history = [] # 在脚本开头就初始化pygame混音器，避免每次调用都初始化浪费时间 pygame.mixer.init() # 定义主函数，异步执行 async def _main(text: str = '测试') -\u003e None: # 创建一个Communicate对象，用于将文本转化为语音 communicate = edge_tts.Communicate(text, VOICE) # 将语音保存到文件中 await communicate.save(OUTPUT_FILE) print(f\"文件已保存到: {OUTPUT_FILE}\") # 检查文件是否存在 if not os.path.exists(OUTPUT_FILE): print(\"错误: 文件未生成\") return # 检查文件大小 if os.path.getsize(OUTPUT_FILE) == 0: print(\"错误: 文件大小为0\") return # 加载音频文件 pygame.mixer.music.load(OUTPUT_FILE) # 播放音频文件 pygame.mixer.music.play() # 等待音频播放结束 while pygame.mixer.music.get_busy(): await asyncio.sleep(0.5) # 定义一个函数，从语言模型获取响应 def get_response_from_llm(question): # 打印当前的聊天记录 print(f'Here is the history list: {chat_history}') # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*4:-1]]) # 生成聊天记录提示 chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" # 构建消息列表 message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] # 打印发送到后端的消息 print(f'Message sent to backend: {message}') # 调用OpenAI的API获取响应 response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=message, temperature=0.7, ) # 获取响应内容 response_str = response.choices[0].message.content return response_str # 主程序入口 if __name__ == \"__main__\": while True: # 获取用户输入 user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break # 将用户输入添加到聊天记录 chat_history.append(('human', user_input)) # 获取语言模型的响应 response = get_response_from_llm(user_input) # 打印响应 print(response) # 将响应添加到聊天记录 chat_history.append(('ai', response)) # 异步运行主函数，将响应转化为语音并播放 asyncio.run(_main(response)) 这次功能合并有几个优化：\n把pygame初始化移到函数外部，脚本首次执行的时候初始化，避免了每次都在函数内初始化，提高速度。\n函数增加了一个参数text，它的类型为str（字符串），默认的内容为“测试”，避免由于后端出错没有文字可说的情况导致的报错。\n几个print增加了格式化字符串输出，提高命令行交互的可读性。\n这个脚本有几个潜在问题（由于是教程就无所谓修复了，但还是拿出来说一下）：\n生成的文件没有重新命名导致每次音频文件都会覆盖，你可以加一个重命名的操作，这样所有生成的语句都可以回溯。\n语音生成函数里缺乏阻断机制，也就是说如果你短时间内问了AI两次，上一句话没说完下一句就也会同时开始播放，就像两个人同时在说话，会出现声音重叠的问题。（由于异步的问题）此问题也好解决，开一个缓存区就可以，但这不是入门教程该有的内容，后续进阶可能会聊。\n拓展：全流式TTS（FSTTS）与语音合成标记语言（SSML） 全流式TTS是一个概念，它应该叫“Full-Stream Text to Speech”，简单地说，TTS可以同时流式地接受文字的输入和输出，并且达到相对自然而流畅的声音。这个技术的难点在于流式输入，在自然语言里，完整的句子对于语气和语调影响很大，如何在句子还没完整输入的时候就直接能够定下这句话的语气呢？我个人认为这需要LLM和TTS引擎的双方配合，一是LLM能根据训练的参数和内置的情感模型预先输出一个情感标记，用于给接下来要输出音频的句子定下情感基调，另一方面还需要TTS引擎能够接受情感基调并流式生成语音。这需要两个LLM紧密配合且都具有相关功能。另一个实现方法是采用多模态输出。多模态很好地解决了两个引擎的协调问题，但问题就在于，这个配合的过程是不可控的，是黑箱。相同的一句话在不同的场合可能有千百种语气（参考“卧槽”的好几种用法），如果把这个控制过程完全交给多模态模型，最终效果很大程度上取决于这个模型的能力，这就造成上限不高，后期可拓展性欠佳的缺点。考虑到作为赛博老婆，语音识别（ASR），声纹识别 (Voiceprint Recognize) 还有离线唤醒（Offline Wake up）等技术都要与LLM进行互动，我们很难把这么多模块合并成一个超大的多模态模型，同时还有好效果，所以我们暂时使用模块化的结构，不同的功能模块各司其职。\n我简单画了一个流程图，大概是这样的系统逻辑： 语音合成标记语言是微软Azure Speech里的一个概念，它是一种基于XML的标记语言，可用于微调文本转语音输出属性，例如音调、发音、语速、音量等。与纯文本输入相比，它可以提供更多的控制权和灵活性。相比较简单的情感基调定义，SSML可以更精细地控制语音的细节，当然对于SSML的生成也有更大的挑战，需要能力较强的LLM完成这样复杂的任务，也需要并发和异步保证交互的流畅性。（希望开源的赶快有类似的，这个太贵了）SSML的开发需要大量优质标记的数据集作为支撑，同时实际生产时为了提高速度，可以使用数据库匹配的方式，预先从已有的类似场景中直接加载类似的配置，降本增效。\n",
+  "wordCount" : "511",
+  "inLanguage": "en",
+  "datePublished": "2024-10-11T23:22:21-02:30",
+  "dateModified": "2024-10-11T23:22:21-02:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://blog.licometa.me/posts/cybermate3/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Cybermate!",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://blog.licometa.me/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://blog.licometa.me/" accesskey="h" title="Cybermate! (Alt + H)">Cybermate!</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://blog.licometa.me/archives/" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      从零开始的赛博老婆！3 - TTS浅谈与实践
+    </h1>
+    <div class="post-meta"><span title='2024-10-11 23:22:21 -0230 NDT'>October 11, 2024</span>&nbsp;·&nbsp;3 min
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#tts%e6%b5%85%e8%b0%88" aria-label="TTS浅谈">TTS浅谈</a></li>
+                <li>
+                    <a href="#edge-tts" aria-label="Edge TTS">Edge TTS</a><ul>
+                        
+                <li>
+                    <a href="#%e5%ae%89%e8%a3%85edge-tts" aria-label="安装Edge TTS">安装Edge TTS</a></li>
+                <li>
+                    <a href="#edge-tts%e4%bd%bf%e7%94%a8" aria-label="Edge TTS使用">Edge TTS使用</a></li>
+                <li>
+                    <a href="#llm%e4%b8%8etts%e7%9a%84%e7%bb%93%e5%90%88" aria-label="LLM与TTS的结合">LLM与TTS的结合</a></li>
+                <li>
+                    <a href="#%e6%8b%93%e5%b1%95%e5%85%a8%e6%b5%81%e5%bc%8fttsfstts%e4%b8%8e%e8%af%ad%e9%9f%b3%e5%90%88%e6%88%90%e6%a0%87%e8%ae%b0%e8%af%ad%e8%a8%80ssml" aria-label="拓展：全流式TTS（FSTTS）与语音合成标记语言（SSML）">拓展：全流式TTS（FSTTS）与语音合成标记语言（SSML）</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="/images/71888962_p0_master1200.jpg" alt="Image Description"  />
+</p>
+<p>PIXIV: 71888962 <a href="https://www.pixiv.net/users/1822272">@Yuuri</a></p>
+<h2 id="tts浅谈">TTS浅谈<a hidden class="anchor" aria-hidden="true" href="#tts浅谈">#</a></h2>
+<p>TTS（<strong>T</strong>ext <strong>T</strong>o <strong>S</strong>peech）是语音合成（<strong>Speech synthesis</strong>）的一个分支，<strong>文本转语音</strong>（<strong>TTS</strong>）系统将正常语言文本转换为语音。TTS系统对于提高交互性有帮助，最近技术发展迅猛，TTS项目百花齐放。</p>
+<p>从RVC的实时变声和动态语调优化，再到效果优秀的VITS，生成对抗网络（GAN）的加持使其声音比以前自然了很多。随着SO-VITS强大的声调控制能力的实现，优秀数据集加持下的Diff-SVC，虚拟歌姬的声音媲美真人，但也随之带来了一系列问题。在我浅显的认知中，我对语音合成还停留在初音未来那个时代，但是时代变化如此之快。目前TTS大有互相融合的趋势，例如<a href="https://github.com/fishaudio/fish-diffusion">fish-diffusion</a>或者Fishaudio旗下的其他项目等，都有不小的进步。</p>
+<p>开源项目如此繁盛，商用发展当然也不落后。看向商业阵营，各大公司都有其绝活。比如<strong>Acapela Group</strong>专门搞已故名人的TTS，这非常有特色。还有众多公司专注于高质量或情感丰富的TTS、定制声音等。而在商用TTS行业中，Azure TTS可以说是龙头，我们本篇文章也会使用微软的免费EdgeTTS服务作为示例。</p>
+<p>这里有一些相关的项目链接：</p>
+<ul>
+<li><a href="https://github.com/fishaudio">Fish Audio</a></li>
+<li><a href="https://github.com/RVC-Boss/GPT-SoVITS">GPT-SoVITS</a></li>
+<li><a href="https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI">Retrieval-based-Voice-Conversion-WebUI</a></li>
+</ul>
+<p>这里还有两个哔哩哔哩up主，专注于音乐翻唱相关的，也推荐参考：</p>
+<ul>
+<li><a href="https://space.bilibili.com/2403955/dynamic">领航员未鸟</a></li>
+</ul>
+<p>东洋雪莲也比较有实力，但似乎不公开分享很多技术细节，故仅作介绍。</p>
+<p>注意，现在互联网上有非常多的TTS引擎，本文章仅使用较为稳定的Edge-TTS，初衷是用于实际应用。如果你需要完全本地使用TTS或者为了好玩个性化训练声音和特殊模型，本教程不适用，请移步到其他个性化TTS炼丹教程，比如GPT-SO-VITS等等。</p>
+<h2 id="edge-tts">Edge TTS<a hidden class="anchor" aria-hidden="true" href="#edge-tts">#</a></h2>
+<p>TTS接受文字输入，然后输出音频。对于Edge TTS的Python版本，它实际上是通过网络请求工作的。因此，它可以很好地在边缘计算平台上运行，因为音频合成是在云端计算并返回给你的。我们使用的是<a href="https://pypi.org/project/edge-tts/">Edge TTS Python</a>库，这里还有GitHub的项目网址：<a href="https://github.com/rany2/edge-tts">edge-tts</a>。</p>
+<h3 id="安装edge-tts">安装Edge TTS<a hidden class="anchor" aria-hidden="true" href="#安装edge-tts">#</a></h3>
+<p>首先安装：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install edge-tts
+</span></span></code></pre></div><p>Edge TTS有两种工作方式，一种是使用命令行交互的方式，如果你只想使用命令模式，你可以使用pipx安装它（来自官网的教程）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pipx install edge-tts
+</span></span></code></pre></div><p>命令行模式我们不用，这里一笔带过。</p>
+<h3 id="edge-tts使用">Edge TTS使用<a hidden class="anchor" aria-hidden="true" href="#edge-tts使用">#</a></h3>
+<p>首先创建一个<code>Edgetts.py</code>文件，然后导入所需要的模块：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 导入需要的库</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> edge_tts
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span></code></pre></div><p>然后初始化TTS引擎。为了获取语言和声音的可选项，可以在命令行窗口输入命令来获取支持的列表：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>edge-tts --list-voices
+</span></span></code></pre></div><p>你会发现输出了一大坨列表，这里就不放出来了。选择需要的<code>NAME</code>然后继续写初始化代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 设置要转化为语音的文本</span>
+</span></span><span style="display:flex;"><span>TEXT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;你好啊，这里是lico！欢迎来到lico的元宇宙！&#34;</span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置语音的语言和声音，注意这个名字是大小写敏感的</span>
+</span></span><span style="display:flex;"><span>VOICE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;zh-CN-XiaoyiNeural&#34;</span> 
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置输出文件的路径，文件将保存在脚本所在的文件夹中</span>
+</span></span><span style="display:flex;"><span>OUTPUT_FILE <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>dirname(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>realpath(__file__)), <span style="color:#e6db74">&#34;test.mp3&#34;</span>)
+</span></span></code></pre></div><p>使用edgetts的函数进行语音生成。注意，异步运行：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 定义主函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_main</span>() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建一个Communicate对象，用于将文本转化为语音</span>
+</span></span><span style="display:flex;"><span>    communicate <span style="color:#f92672">=</span> edge_tts<span style="color:#f92672">.</span>Communicate(TEXT, VOICE)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将语音保存到文件中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> communicate<span style="color:#f92672">.</span>save(OUTPUT_FILE)  
+</span></span></code></pre></div><p>最后加上主函数，整体的代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 导入需要的库</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> edge_tts  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置要转化为语音的文本</span>
+</span></span><span style="display:flex;"><span>TEXT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;你好啊，这里是lico！欢迎来到lico的元宇宙！&#34;</span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置语音的语言和声音</span>
+</span></span><span style="display:flex;"><span>VOICE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;zh-CN-XiaoyiNeural&#34;</span> 
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置输出文件的路径，文件将保存在脚本所在的文件夹中</span>
+</span></span><span style="display:flex;"><span>OUTPUT_FILE <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>dirname(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>realpath(__file__)), <span style="color:#e6db74">&#34;test.mp3&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义主函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_main</span>() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建一个Communicate对象，用于将文本转化为语音</span>
+</span></span><span style="display:flex;"><span>    communicate <span style="color:#f92672">=</span> edge_tts<span style="color:#f92672">.</span>Communicate(TEXT, VOICE)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将语音保存到文件中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> communicate<span style="color:#f92672">.</span>save(OUTPUT_FILE)  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果这个脚本是直接运行的，而不是被导入的，那么就运行主函数</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:  
+</span></span><span style="display:flex;"><span>    asyncio<span style="color:#f92672">.</span>run(_main())
+</span></span></code></pre></div><p>在命令行运行之后，你就会发现脚本旁边生成了一个<code>test.mp3</code>，这就是生成的语音，你可以尝试在<strong>不社会性死亡</strong>的情况下播放或者修改成更社死的文本。</p>
+<p>Edge TTS还提供了流式生成的选项，这里不过多叙述，因为流式仅指输出，输入是没办法流式的，因为需要对整个文本进行音调和音素的规划，不过我们还是有机会解决这个问题，后续有机会再写吧。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 官方的流式生成的示例</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">amain</span>() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;Main function&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    communicate <span style="color:#f92672">=</span> edge_tts<span style="color:#f92672">.</span>Communicate(TEXT, VOICE)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">with</span> open(OUTPUT_FILE, <span style="color:#e6db74">&#34;wb&#34;</span>) <span style="color:#66d9ef">as</span> file:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">for</span> chunk <span style="color:#f92672">in</span> communicate<span style="color:#f92672">.</span>stream():
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> chunk[<span style="color:#e6db74">&#34;type&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;audio&#34;</span>:
+</span></span><span style="display:flex;"><span>                file<span style="color:#f92672">.</span>write(chunk[<span style="color:#e6db74">&#34;data&#34;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">elif</span> chunk[<span style="color:#e6db74">&#34;type&#34;</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;WordBoundary&#34;</span>:
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;WordBoundary: </span><span style="color:#e6db74">{</span>chunk<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span></code></pre></div><h3 id="llm与tts的结合">LLM与TTS的结合<a hidden class="anchor" aria-hidden="true" href="#llm与tts的结合">#</a></h3>
+<p>我们接下来尝试给我们上次的代码加上TTS语音输出，不过在此之前，我们需要先把TTS脚本改一下，让它变成一个函数，这样我们需要的时候调用它就好了。</p>
+<p>我们想要使用命令行交互，并且能够播放声音。考虑到多平台的兼容性，我们安装一个库<code>pygame</code>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install pygame
+</span></span></code></pre></div><p>然后我们修改之前的脚本，试试能不能播放：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 导入需要的库  </span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> edge_tts  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pygame  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置要转化为语音的文本  </span>
+</span></span><span style="display:flex;"><span>TEXT <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;你好啊，这里是lico！欢迎来到lico的元宇宙！&#34;</span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置语音的语言和声音  </span>
+</span></span><span style="display:flex;"><span>VOICE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;zh-CN-XiaoyiNeural&#34;</span>   
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置输出文件的路径，文件将保存在脚本所在的文件夹中  </span>
+</span></span><span style="display:flex;"><span>OUTPUT_FILE <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>dirname(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>realpath(__file__)), <span style="color:#e6db74">&#34;test.mp3&#34;</span>)  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义主函数  </span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_main</span>() <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建一个Communicate对象，用于将文本转化为语音  </span>
+</span></span><span style="display:flex;"><span>    communicate <span style="color:#f92672">=</span> edge_tts<span style="color:#f92672">.</span>Communicate(TEXT, VOICE)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将语音保存到文件中  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> communicate<span style="color:#f92672">.</span>save(OUTPUT_FILE)  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;文件已保存到: </span><span style="color:#e6db74">{</span>OUTPUT_FILE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 检查文件是否存在  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>exists(OUTPUT_FILE):  
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;错误: 文件未生成&#34;</span>)  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 检查文件大小  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>getsize(OUTPUT_FILE) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:  
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;错误: 文件大小为0&#34;</span>)  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 初始化pygame混音器  </span>
+</span></span><span style="display:flex;"><span>    pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>init()  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 加载音频文件  </span>
+</span></span><span style="display:flex;"><span>    pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>music<span style="color:#f92672">.</span>load(OUTPUT_FILE)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 播放音频文件  </span>
+</span></span><span style="display:flex;"><span>    pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>music<span style="color:#f92672">.</span>play()  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 等待音频播放结束  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>music<span style="color:#f92672">.</span>get_busy():  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> asyncio<span style="color:#f92672">.</span>sleep(<span style="color:#ae81ff">1</span>)  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 如果这个脚本是直接运行的，而不是被导入的，那么就运行主函数  </span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:  
+</span></span><span style="display:flex;"><span>    asyncio<span style="color:#f92672">.</span>run(_main())
+</span></span></code></pre></div><p>如果你成功地运行了代码，TTS的声音会通过默认的扬声器播放出来。由于第一次使用Pygame会有一定的载入时间，因此运行脚本后可能要等几秒才会播放出声音。</p>
+<p>现在我们有了音频播放函数了，我们可以把这个函数和我们之前的函数合在一起，达到TTS和文字同时交互的效果，整体的代码看起来是这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> asyncio  <span style="color:#75715e"># 导入异步IO模块  </span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> edge_tts  <span style="color:#75715e"># 导入edge_tts模块，用于文本转语音  </span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os  <span style="color:#75715e"># 导入os模块，用于文件路径操作  </span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pygame  <span style="color:#75715e"># 导入pygame模块，用于音频播放  </span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI  <span style="color:#75715e"># 导入OpenAI模块，用于与OpenAI的API交互  </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化OpenAI的聊天模型  </span>
+</span></span><span style="display:flex;"><span>chat_model <span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 你需要把这个替换成你的后端的API地址  </span>
+</span></span><span style="display:flex;"><span>    base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 这是用于身份验证的 API Key  </span>
+</span></span><span style="display:flex;"><span>    api_key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>  
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置语音的语言和声音  </span>
+</span></span><span style="display:flex;"><span>VOICE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;zh-CN-XiaoyiNeural&#34;</span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置输出文件的路径，文件将保存在脚本所在的文件夹中，每一次生成后会覆盖之前的，仅用来测试  </span>
+</span></span><span style="display:flex;"><span>OUTPUT_FILE <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>dirname(os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>realpath(__file__)), <span style="color:#e6db74">&#34;test.mp3&#34;</span>)  
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 设置聊天记录列表  </span>
+</span></span><span style="display:flex;"><span>chat_history <span style="color:#f92672">=</span> []  
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 在脚本开头就初始化pygame混音器，避免每次调用都初始化浪费时间  </span>
+</span></span><span style="display:flex;"><span>pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>init()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义主函数，异步执行  </span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_main</span>(text: str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;测试&#39;</span>) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">None</span>:  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建一个Communicate对象，用于将文本转化为语音  </span>
+</span></span><span style="display:flex;"><span>    communicate <span style="color:#f92672">=</span> edge_tts<span style="color:#f92672">.</span>Communicate(text, VOICE)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将语音保存到文件中  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">await</span> communicate<span style="color:#f92672">.</span>save(OUTPUT_FILE)  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;文件已保存到: </span><span style="color:#e6db74">{</span>OUTPUT_FILE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 检查文件是否存在  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>exists(OUTPUT_FILE):  
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;错误: 文件未生成&#34;</span>)  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 检查文件大小  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>getsize(OUTPUT_FILE) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:  
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;错误: 文件大小为0&#34;</span>)  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 加载音频文件  </span>
+</span></span><span style="display:flex;"><span>    pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>music<span style="color:#f92672">.</span>load(OUTPUT_FILE)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 播放音频文件  </span>
+</span></span><span style="display:flex;"><span>    pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>music<span style="color:#f92672">.</span>play()  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 等待音频播放结束  </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> pygame<span style="color:#f92672">.</span>mixer<span style="color:#f92672">.</span>music<span style="color:#f92672">.</span>get_busy():  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> asyncio<span style="color:#f92672">.</span>sleep(<span style="color:#ae81ff">0.5</span>)  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 定义一个函数，从语言模型获取响应  </span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 打印当前的聊天记录  </span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;Here is the history list: </span><span style="color:#e6db74">{</span>chat_history<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取最近的聊天记录窗口  </span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 生成聊天记录提示  </span>
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 构建消息列表  </span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [  
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},  
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},  
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},  
+</span></span><span style="display:flex;"><span>    ]  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 打印发送到后端的消息  </span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;Message sent to backend: </span><span style="color:#e6db74">{</span>message<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>)  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用OpenAI的API获取响应  </span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,  
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>message,  
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,  
+</span></span><span style="display:flex;"><span>    )  
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取响应内容  </span>
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 主程序入口  </span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:  
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:  
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取用户输入  </span>
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)  
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:  
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)  
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>  
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将用户输入添加到聊天记录  </span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;human&#39;</span>, user_input))  
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取语言模型的响应  </span>
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)  
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 打印响应  </span>
+</span></span><span style="display:flex;"><span>        print(response)  
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将响应添加到聊天记录  </span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;ai&#39;</span>, response))  
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 异步运行主函数，将响应转化为语音并播放  </span>
+</span></span><span style="display:flex;"><span>        asyncio<span style="color:#f92672">.</span>run(_main(response))  
+</span></span></code></pre></div><p>这次功能合并有几个优化：</p>
+<ol>
+<li>
+<p>把pygame初始化移到函数外部，脚本首次执行的时候初始化，避免了每次都在函数内初始化，提高速度。</p>
+</li>
+<li>
+<p>函数增加了一个参数<code>text</code>，它的类型为<code>str</code>（字符串），默认的内容为“测试”，避免由于后端出错没有文字可说的情况导致的报错。</p>
+</li>
+<li>
+<p>几个<code>print</code>增加了格式化字符串输出，提高命令行交互的可读性。</p>
+</li>
+</ol>
+<p>这个脚本有几个潜在问题（由于是教程就无所谓修复了，但还是拿出来说一下）：</p>
+<ol>
+<li>
+<p>生成的文件没有重新命名导致每次音频文件都会覆盖，你可以加一个重命名的操作，这样所有生成的语句都可以回溯。</p>
+</li>
+<li>
+<p>语音生成函数里缺乏阻断机制，也就是说如果你短时间内问了AI两次，上一句话没说完下一句就也会同时开始播放，就像两个人同时在说话，会出现声音重叠的问题。（由于异步的问题）此问题也好解决，开一个缓存区就可以，但这不是入门教程该有的内容，后续进阶可能会聊。</p>
+</li>
+</ol>
+<h3 id="拓展全流式ttsfstts与语音合成标记语言ssml">拓展：全流式TTS（FSTTS）与语音合成标记语言（SSML）<a hidden class="anchor" aria-hidden="true" href="#拓展全流式ttsfstts与语音合成标记语言ssml">#</a></h3>
+<p>全流式TTS是一个概念，它应该叫“Full-Stream Text to Speech”，简单地说，TTS可以<strong>同时</strong>流式地接受文字的输入和输出，并且达到相对自然而流畅的声音。这个技术的难点在于流式输入，在自然语言里，完整的句子对于语气和语调影响很大，如何在句子还没完整输入的时候就直接能够定下这句话的语气呢？我个人认为这需要LLM和TTS引擎的双方配合，一是LLM能根据训练的参数和内置的情感模型预先输出一个情感标记，用于给接下来要输出音频的句子定下情感基调，另一方面还需要TTS引擎能够接受情感基调并流式生成语音。这需要两个LLM紧密配合且都具有相关功能。<strong>另一个实现方法</strong>是采用多模态输出。多模态很好地解决了两个引擎的协调问题，但问题就在于，这个配合的过程是不可控的，是黑箱。相同的一句话在不同的场合可能有千百种语气（参考“卧槽”的好几种用法），如果把这个控制过程完全交给多模态模型，最终效果很大程度上取决于这个模型的能力，这就造成上限不高，后期可拓展性欠佳的缺点。考虑到作为赛博老婆，语音识别（ASR），声纹识别 (Voiceprint Recognize) 还有离线唤醒（Offline Wake up）等技术都要与LLM进行互动，我们很难把这么多模块合并成一个超大的多模态模型，同时还有好效果，所以我们暂时使用模块化的结构，不同的功能模块各司其职。</p>
+<p>我简单画了一个流程图，大概是这样的系统逻辑： <img loading="lazy" src="https://raw.githubusercontent.com/4everhope/blog-comment/refs/heads/main/Audio-interaction-system.png" alt=""  />
+</p>
+<p>语音合成标记语言是微软Azure Speech里的一个概念，它是一种基于XML的标记语言，可用于微调文本转语音输出属性，例如音调、发音、语速、音量等。与纯文本输入相比，它可以提供更多的控制权和灵活性。相比较简单的情感基调定义，SSML可以更精细地控制语音的细节，当然对于SSML的生成也有更大的挑战，需要能力较强的LLM完成这样复杂的任务，也需要并发和异步保证交互的流畅性。（希望开源的赶快有类似的，这个太贵了）SSML的开发需要大量优质标记的数据集作为支撑，同时实际生产时为了提高速度，可以使用数据库匹配的方式，预先从已有的类似场景中直接加载类似的配置，降本增效。</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://blog.licometa.me/">Cybermate!</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

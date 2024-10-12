@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>从零开始的赛博老婆！4 - 短期记忆与记忆体系 | Cybermate!</title>
+<meta name="keywords" content="">
+<meta name="description" content="
+
+PIXIV: 94008036  @苏翼丶
+Agent记忆体系浅谈
+（我写完这篇文章再重新回看，记忆这两个词太多了，我发现我不认识“记忆”这两个字了，大家点点赞吧写教程真的消耗阳寿……(｡ ́︿ ̀｡)
+从GPT3破圈那一刻起，大家对LLM的记忆体系就众说纷纭。从技术上来讲，一方面Transformer架构衍生出的一些技术促进了记忆体系的发展（如 Embedding/Vector Database），另一方面有需求催生了另一些技术（如 Graph Database）。但就从2023年发展到现在，Agent的记忆体系进展比较缓慢。
+我在这些技术和概念的帮助下，设计了一套针对于赛博老婆的记忆体系。它的特点就是自动存取，同时可以保证分级的持久化记忆。
+记忆概念分类
+我想把赛博老婆的记忆体系分成三类：短期记忆，中期记忆，长期记忆。我们来分别解释这几个概念：
+短期记忆
+短期记忆有多短期呢？我认为短期记忆是包含最丰富的，最原始的信息的。就像人的记忆一样，人类每天都会忘掉很多事情的很多细节，但是你可能会记得刚刚发生的事情的并能够说出细节。我认为在LLM还没有开始总结或简化那一部分最原始的记忆之前的内容，都算作短期记忆。或者通俗一点讲，对于赛博老婆，每一个会话的上下文，或者每一天当天（昨天）的记忆，都算作短期记忆。因为这一部分记忆，包含了你和赛博老婆交互的原始记录。但是在这里，我想稍微延伸一点：我把当天的总结记忆和每一次会话的记忆也算作短期记忆之内。之所以如此规定，是因为在实际的记忆载入中，这类的近期记忆往往频率更高，同时需要相对详细的细节，他们往往是一起无条件载入的。也就是说，上下文记忆，默认是必要的，而上几次的对话，或者昨天聊了什么，也会有更大概率被提起，他们的载入频率也差不多，都很高。
+
+会话：你和赛博老婆互动，聊了几句，然后你就去做别的事情了，比如说吃了个饭。当你吃完饭，可能已经过了会话超时时间，而你又不想继续之前的话题，而是聊点别的，于是赛博老婆就会开一个新的会话。这在后续的记忆结构化中有利于实体提取与记忆网的生成。
+
+中期记忆
+中期记忆有别于短期记忆，中期记忆是经过简化和总结的，也就是丢弃掉了某些细节而得到的记忆。但我们为什么称之为中期记忆呢？这仍然是属于对人脑记忆的模仿，人脑会暂存一部分正在进行的事情，并简化其中的内容，等到这个事件结束了，有了结果了，就会大幅度遗忘，可能最后只会保留一个印象，类似于：我曾经做过什么事情，当时的结果是……而对曾经事情的过程和细节，完全遗忘。而这类中期记忆也不会对永久记忆网产生较大的影响。
+我们在这里举例说明：你在某个网购官方平台购买了一个全新显卡RTX 9090 Ti Super Plus Max Ultra 1024TB，你付款商家发货寄出快递。由于你一直心心念念这款超强的显卡，你一直记着有这么个快递在路上，于是没事儿就点开查询快递到哪里了。这就是属于中期记忆的“事件中”。过了几天，你的快递终于到了，你非常开心，迫不及待地拆了包装，安装上去，这时你可能已经忘记自己看了多少次快递跟踪了，也忘了它是几天内到达的，因为这个时候你很想把它安装到电脑上看看效果。这就是中期记忆的遗忘特性**，阶段性目标达成可能会遗忘掉很多细节，但是事件存在周期又远超“短期记忆”。你安装到了电脑，但是你发现用这个显卡跑LLM慢的要死，然后你惊讶的发现，由于某黄的精准刀法，RTX 9090 Ti Super Plus Max Ultra 1024TB虽然拥有超大的显存，但是其显存位宽却只有可怜的128bit——连下一代的10070 Ti Super Plus Max Ultra Gaming的升级版本的150bit都没有！在你不得不感叹某黄精准刀法的同时不由得骂：“Fxxk you Nvxdxa !!” 你很难过，在某海鲜市场折价出手，期间还没事就看一看某鱼，生怕买家到手刀或者无理由退款等逆天操作……终于，你是幸运的，你成功地卖出了显卡，这段风波画上句号。等到几年后你再想起这件事情，可能只会记得那印象深刻的阉割和那句“Fxxk you Nvxdxa !!”
+这就是中期记忆的特点了，不是所有记忆都会变成中期记忆的，只是某些特定事件，周期不短不长的才有资格被称为中期记忆。另外，上述案例是虚构的，绝对不是真实事件改编！！！
+长期记忆
+好，终于聊到这里了。我们要开始加速了。
+人脑的长期记忆是一个非常复杂的系统。我们搞赛博老婆只能尽量平衡“精简”和“功能”。然而，赛博老婆可不像人，当你真的需要她回忆很重要的细节的时候，可不能像人一样，卖个萌然后糊弄过去。赛博老婆的长期记忆需要能够回溯到最原始的对话记忆或相关文档。同时，大多数情况，仅仅是一些关键信息的提示。这就对索引和查询系统提出了很高的要求，长期记忆系统设计的关键，就是如何高效而精确地自动存取，尤其是取。
+我把长期记忆的查询和索引分成两种模式，“模糊检索”和“关系检索”，对应RAG和Graph Query。这只是两种不同的检索方法，实际情况大多是混合的，也就是并行的。为什么要这么做呢？我们来看实际例子。
+模糊检索：你需要让赛博老婆回忆一下你曾经都在哪几天消费超过500元。这时，“超过500元”是一个语意，他是和价值/开支相关的，这种情况记忆执行的是语意数量的范围检索，是相对模糊的。（因为记忆库是通用的，我们没有一个专门的账本数据库，不然的话直接表达式&gt;500就可以解决）此时，语意模糊检索占大头，而关系检索占小头，关系检索仅作为实体或后续进一步细节查询的补充。
+关系检索：你让你的赛博老婆帮你分析你自己现在的人际网并找出你人际网中其他人的潜在联系。此时，就会用到关系检索。关系检索依赖于图数据库，它会把记忆转化为实体并建立联系，当我们执行实体关系连锁检索时，Query的三元组会激活好几个初始节点，代表初始的查询实体。然后通过检索与这些实体相连接的其他实体的信息，返回结果。这时，与Query在时空上，或语意上或其他任何形式的关联，都会返回。后续可以进行多次的知识网跳跃或者进行网图归类重排，或者定位到某个范围很小的节点群，执行模糊检索等。
+在上述案例中，我们不难发现，两大类检索方式经常时混合使用的，这也是目前的趋势。实际上，短中长期记忆在实际应用里也是混合使用的，只是可能每一次调用时侧重点或者强度不同。
+记忆系统的相关技术
+非关系型数据库（NoSQL）
+例如MongoDB，作为一种非关系型数据库，在存储文本音频和图片等多媒体数据的时候很有用。因为我们所有的原始数据都存在这里，上级数据库溯源到这里，需要原始数据相对方便一点，后续更改添加条目，备份维护都比较简单。MongoDB的python SDK还是很不错的，同时Mongo DB部署的平台支持也不错。
+嵌入（Embedding）
+一种数据量化技术，与图数据库和向量数据库配合，对多媒体数据进行多角度量化（语意，声学特征，图像特征等），便于数据库和LLM进行处理。
+向量数据库（Vector Database）
+存储向量化的嵌入数据和对应的经过总结的二级数据，执行语意搜索，RAG，混合重排等。向量数据库很善于相似搜索，包括图片文本音频等。
+图数据库（Graph Database）
+图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。">
+<meta name="author" content="">
+<link rel="canonical" href="https://blog.licometa.me/posts/cybermate4/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.2335395c2bfc3803c675c5051856bb74c664fce999ae87dcedc812486409e3c0.css" integrity="sha256-IzU5XCv8OAPGdcUFGFa7dMZk/OmZrofc7cgSSGQJ48A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://blog.licometa.me/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://blog.licometa.me/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://blog.licometa.me/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://blog.licometa.me/apple-touch-icon.png">
+<link rel="mask-icon" href="https://blog.licometa.me/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://blog.licometa.me/posts/cybermate4/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="从零开始的赛博老婆！4 - 短期记忆与记忆体系" />
+<meta property="og:description" content="
+
+PIXIV: 94008036  @苏翼丶
+Agent记忆体系浅谈
+（我写完这篇文章再重新回看，记忆这两个词太多了，我发现我不认识“记忆”这两个字了，大家点点赞吧写教程真的消耗阳寿……(｡ ́︿ ̀｡)
+从GPT3破圈那一刻起，大家对LLM的记忆体系就众说纷纭。从技术上来讲，一方面Transformer架构衍生出的一些技术促进了记忆体系的发展（如 Embedding/Vector Database），另一方面有需求催生了另一些技术（如 Graph Database）。但就从2023年发展到现在，Agent的记忆体系进展比较缓慢。
+我在这些技术和概念的帮助下，设计了一套针对于赛博老婆的记忆体系。它的特点就是自动存取，同时可以保证分级的持久化记忆。
+记忆概念分类
+我想把赛博老婆的记忆体系分成三类：短期记忆，中期记忆，长期记忆。我们来分别解释这几个概念：
+短期记忆
+短期记忆有多短期呢？我认为短期记忆是包含最丰富的，最原始的信息的。就像人的记忆一样，人类每天都会忘掉很多事情的很多细节，但是你可能会记得刚刚发生的事情的并能够说出细节。我认为在LLM还没有开始总结或简化那一部分最原始的记忆之前的内容，都算作短期记忆。或者通俗一点讲，对于赛博老婆，每一个会话的上下文，或者每一天当天（昨天）的记忆，都算作短期记忆。因为这一部分记忆，包含了你和赛博老婆交互的原始记录。但是在这里，我想稍微延伸一点：我把当天的总结记忆和每一次会话的记忆也算作短期记忆之内。之所以如此规定，是因为在实际的记忆载入中，这类的近期记忆往往频率更高，同时需要相对详细的细节，他们往往是一起无条件载入的。也就是说，上下文记忆，默认是必要的，而上几次的对话，或者昨天聊了什么，也会有更大概率被提起，他们的载入频率也差不多，都很高。
+
+会话：你和赛博老婆互动，聊了几句，然后你就去做别的事情了，比如说吃了个饭。当你吃完饭，可能已经过了会话超时时间，而你又不想继续之前的话题，而是聊点别的，于是赛博老婆就会开一个新的会话。这在后续的记忆结构化中有利于实体提取与记忆网的生成。
+
+中期记忆
+中期记忆有别于短期记忆，中期记忆是经过简化和总结的，也就是丢弃掉了某些细节而得到的记忆。但我们为什么称之为中期记忆呢？这仍然是属于对人脑记忆的模仿，人脑会暂存一部分正在进行的事情，并简化其中的内容，等到这个事件结束了，有了结果了，就会大幅度遗忘，可能最后只会保留一个印象，类似于：我曾经做过什么事情，当时的结果是……而对曾经事情的过程和细节，完全遗忘。而这类中期记忆也不会对永久记忆网产生较大的影响。
+我们在这里举例说明：你在某个网购官方平台购买了一个全新显卡RTX 9090 Ti Super Plus Max Ultra 1024TB，你付款商家发货寄出快递。由于你一直心心念念这款超强的显卡，你一直记着有这么个快递在路上，于是没事儿就点开查询快递到哪里了。这就是属于中期记忆的“事件中”。过了几天，你的快递终于到了，你非常开心，迫不及待地拆了包装，安装上去，这时你可能已经忘记自己看了多少次快递跟踪了，也忘了它是几天内到达的，因为这个时候你很想把它安装到电脑上看看效果。这就是中期记忆的遗忘特性**，阶段性目标达成可能会遗忘掉很多细节，但是事件存在周期又远超“短期记忆”。你安装到了电脑，但是你发现用这个显卡跑LLM慢的要死，然后你惊讶的发现，由于某黄的精准刀法，RTX 9090 Ti Super Plus Max Ultra 1024TB虽然拥有超大的显存，但是其显存位宽却只有可怜的128bit——连下一代的10070 Ti Super Plus Max Ultra Gaming的升级版本的150bit都没有！在你不得不感叹某黄精准刀法的同时不由得骂：“Fxxk you Nvxdxa !!” 你很难过，在某海鲜市场折价出手，期间还没事就看一看某鱼，生怕买家到手刀或者无理由退款等逆天操作……终于，你是幸运的，你成功地卖出了显卡，这段风波画上句号。等到几年后你再想起这件事情，可能只会记得那印象深刻的阉割和那句“Fxxk you Nvxdxa !!”
+这就是中期记忆的特点了，不是所有记忆都会变成中期记忆的，只是某些特定事件，周期不短不长的才有资格被称为中期记忆。另外，上述案例是虚构的，绝对不是真实事件改编！！！
+长期记忆
+好，终于聊到这里了。我们要开始加速了。
+人脑的长期记忆是一个非常复杂的系统。我们搞赛博老婆只能尽量平衡“精简”和“功能”。然而，赛博老婆可不像人，当你真的需要她回忆很重要的细节的时候，可不能像人一样，卖个萌然后糊弄过去。赛博老婆的长期记忆需要能够回溯到最原始的对话记忆或相关文档。同时，大多数情况，仅仅是一些关键信息的提示。这就对索引和查询系统提出了很高的要求，长期记忆系统设计的关键，就是如何高效而精确地自动存取，尤其是取。
+我把长期记忆的查询和索引分成两种模式，“模糊检索”和“关系检索”，对应RAG和Graph Query。这只是两种不同的检索方法，实际情况大多是混合的，也就是并行的。为什么要这么做呢？我们来看实际例子。
+模糊检索：你需要让赛博老婆回忆一下你曾经都在哪几天消费超过500元。这时，“超过500元”是一个语意，他是和价值/开支相关的，这种情况记忆执行的是语意数量的范围检索，是相对模糊的。（因为记忆库是通用的，我们没有一个专门的账本数据库，不然的话直接表达式&gt;500就可以解决）此时，语意模糊检索占大头，而关系检索占小头，关系检索仅作为实体或后续进一步细节查询的补充。
+关系检索：你让你的赛博老婆帮你分析你自己现在的人际网并找出你人际网中其他人的潜在联系。此时，就会用到关系检索。关系检索依赖于图数据库，它会把记忆转化为实体并建立联系，当我们执行实体关系连锁检索时，Query的三元组会激活好几个初始节点，代表初始的查询实体。然后通过检索与这些实体相连接的其他实体的信息，返回结果。这时，与Query在时空上，或语意上或其他任何形式的关联，都会返回。后续可以进行多次的知识网跳跃或者进行网图归类重排，或者定位到某个范围很小的节点群，执行模糊检索等。
+在上述案例中，我们不难发现，两大类检索方式经常时混合使用的，这也是目前的趋势。实际上，短中长期记忆在实际应用里也是混合使用的，只是可能每一次调用时侧重点或者强度不同。
+记忆系统的相关技术
+非关系型数据库（NoSQL）
+例如MongoDB，作为一种非关系型数据库，在存储文本音频和图片等多媒体数据的时候很有用。因为我们所有的原始数据都存在这里，上级数据库溯源到这里，需要原始数据相对方便一点，后续更改添加条目，备份维护都比较简单。MongoDB的python SDK还是很不错的，同时Mongo DB部署的平台支持也不错。
+嵌入（Embedding）
+一种数据量化技术，与图数据库和向量数据库配合，对多媒体数据进行多角度量化（语意，声学特征，图像特征等），便于数据库和LLM进行处理。
+向量数据库（Vector Database）
+存储向量化的嵌入数据和对应的经过总结的二级数据，执行语意搜索，RAG，混合重排等。向量数据库很善于相似搜索，包括图片文本音频等。
+图数据库（Graph Database）
+图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.licometa.me/posts/cybermate4/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-10-11T23:23:47-02:30" />
+<meta property="article:modified_time" content="2024-10-11T23:23:47-02:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="从零开始的赛博老婆！4 - 短期记忆与记忆体系"/>
+<meta name="twitter:description" content="
+
+PIXIV: 94008036  @苏翼丶
+Agent记忆体系浅谈
+（我写完这篇文章再重新回看，记忆这两个词太多了，我发现我不认识“记忆”这两个字了，大家点点赞吧写教程真的消耗阳寿……(｡ ́︿ ̀｡)
+从GPT3破圈那一刻起，大家对LLM的记忆体系就众说纷纭。从技术上来讲，一方面Transformer架构衍生出的一些技术促进了记忆体系的发展（如 Embedding/Vector Database），另一方面有需求催生了另一些技术（如 Graph Database）。但就从2023年发展到现在，Agent的记忆体系进展比较缓慢。
+我在这些技术和概念的帮助下，设计了一套针对于赛博老婆的记忆体系。它的特点就是自动存取，同时可以保证分级的持久化记忆。
+记忆概念分类
+我想把赛博老婆的记忆体系分成三类：短期记忆，中期记忆，长期记忆。我们来分别解释这几个概念：
+短期记忆
+短期记忆有多短期呢？我认为短期记忆是包含最丰富的，最原始的信息的。就像人的记忆一样，人类每天都会忘掉很多事情的很多细节，但是你可能会记得刚刚发生的事情的并能够说出细节。我认为在LLM还没有开始总结或简化那一部分最原始的记忆之前的内容，都算作短期记忆。或者通俗一点讲，对于赛博老婆，每一个会话的上下文，或者每一天当天（昨天）的记忆，都算作短期记忆。因为这一部分记忆，包含了你和赛博老婆交互的原始记录。但是在这里，我想稍微延伸一点：我把当天的总结记忆和每一次会话的记忆也算作短期记忆之内。之所以如此规定，是因为在实际的记忆载入中，这类的近期记忆往往频率更高，同时需要相对详细的细节，他们往往是一起无条件载入的。也就是说，上下文记忆，默认是必要的，而上几次的对话，或者昨天聊了什么，也会有更大概率被提起，他们的载入频率也差不多，都很高。
+
+会话：你和赛博老婆互动，聊了几句，然后你就去做别的事情了，比如说吃了个饭。当你吃完饭，可能已经过了会话超时时间，而你又不想继续之前的话题，而是聊点别的，于是赛博老婆就会开一个新的会话。这在后续的记忆结构化中有利于实体提取与记忆网的生成。
+
+中期记忆
+中期记忆有别于短期记忆，中期记忆是经过简化和总结的，也就是丢弃掉了某些细节而得到的记忆。但我们为什么称之为中期记忆呢？这仍然是属于对人脑记忆的模仿，人脑会暂存一部分正在进行的事情，并简化其中的内容，等到这个事件结束了，有了结果了，就会大幅度遗忘，可能最后只会保留一个印象，类似于：我曾经做过什么事情，当时的结果是……而对曾经事情的过程和细节，完全遗忘。而这类中期记忆也不会对永久记忆网产生较大的影响。
+我们在这里举例说明：你在某个网购官方平台购买了一个全新显卡RTX 9090 Ti Super Plus Max Ultra 1024TB，你付款商家发货寄出快递。由于你一直心心念念这款超强的显卡，你一直记着有这么个快递在路上，于是没事儿就点开查询快递到哪里了。这就是属于中期记忆的“事件中”。过了几天，你的快递终于到了，你非常开心，迫不及待地拆了包装，安装上去，这时你可能已经忘记自己看了多少次快递跟踪了，也忘了它是几天内到达的，因为这个时候你很想把它安装到电脑上看看效果。这就是中期记忆的遗忘特性**，阶段性目标达成可能会遗忘掉很多细节，但是事件存在周期又远超“短期记忆”。你安装到了电脑，但是你发现用这个显卡跑LLM慢的要死，然后你惊讶的发现，由于某黄的精准刀法，RTX 9090 Ti Super Plus Max Ultra 1024TB虽然拥有超大的显存，但是其显存位宽却只有可怜的128bit——连下一代的10070 Ti Super Plus Max Ultra Gaming的升级版本的150bit都没有！在你不得不感叹某黄精准刀法的同时不由得骂：“Fxxk you Nvxdxa !!” 你很难过，在某海鲜市场折价出手，期间还没事就看一看某鱼，生怕买家到手刀或者无理由退款等逆天操作……终于，你是幸运的，你成功地卖出了显卡，这段风波画上句号。等到几年后你再想起这件事情，可能只会记得那印象深刻的阉割和那句“Fxxk you Nvxdxa !!”
+这就是中期记忆的特点了，不是所有记忆都会变成中期记忆的，只是某些特定事件，周期不短不长的才有资格被称为中期记忆。另外，上述案例是虚构的，绝对不是真实事件改编！！！
+长期记忆
+好，终于聊到这里了。我们要开始加速了。
+人脑的长期记忆是一个非常复杂的系统。我们搞赛博老婆只能尽量平衡“精简”和“功能”。然而，赛博老婆可不像人，当你真的需要她回忆很重要的细节的时候，可不能像人一样，卖个萌然后糊弄过去。赛博老婆的长期记忆需要能够回溯到最原始的对话记忆或相关文档。同时，大多数情况，仅仅是一些关键信息的提示。这就对索引和查询系统提出了很高的要求，长期记忆系统设计的关键，就是如何高效而精确地自动存取，尤其是取。
+我把长期记忆的查询和索引分成两种模式，“模糊检索”和“关系检索”，对应RAG和Graph Query。这只是两种不同的检索方法，实际情况大多是混合的，也就是并行的。为什么要这么做呢？我们来看实际例子。
+模糊检索：你需要让赛博老婆回忆一下你曾经都在哪几天消费超过500元。这时，“超过500元”是一个语意，他是和价值/开支相关的，这种情况记忆执行的是语意数量的范围检索，是相对模糊的。（因为记忆库是通用的，我们没有一个专门的账本数据库，不然的话直接表达式&gt;500就可以解决）此时，语意模糊检索占大头，而关系检索占小头，关系检索仅作为实体或后续进一步细节查询的补充。
+关系检索：你让你的赛博老婆帮你分析你自己现在的人际网并找出你人际网中其他人的潜在联系。此时，就会用到关系检索。关系检索依赖于图数据库，它会把记忆转化为实体并建立联系，当我们执行实体关系连锁检索时，Query的三元组会激活好几个初始节点，代表初始的查询实体。然后通过检索与这些实体相连接的其他实体的信息，返回结果。这时，与Query在时空上，或语意上或其他任何形式的关联，都会返回。后续可以进行多次的知识网跳跃或者进行网图归类重排，或者定位到某个范围很小的节点群，执行模糊检索等。
+在上述案例中，我们不难发现，两大类检索方式经常时混合使用的，这也是目前的趋势。实际上，短中长期记忆在实际应用里也是混合使用的，只是可能每一次调用时侧重点或者强度不同。
+记忆系统的相关技术
+非关系型数据库（NoSQL）
+例如MongoDB，作为一种非关系型数据库，在存储文本音频和图片等多媒体数据的时候很有用。因为我们所有的原始数据都存在这里，上级数据库溯源到这里，需要原始数据相对方便一点，后续更改添加条目，备份维护都比较简单。MongoDB的python SDK还是很不错的，同时Mongo DB部署的平台支持也不错。
+嵌入（Embedding）
+一种数据量化技术，与图数据库和向量数据库配合，对多媒体数据进行多角度量化（语意，声学特征，图像特征等），便于数据库和LLM进行处理。
+向量数据库（Vector Database）
+存储向量化的嵌入数据和对应的经过总结的二级数据，执行语意搜索，RAG，混合重排等。向量数据库很善于相似搜索，包括图片文本音频等。
+图数据库（Graph Database）
+图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://blog.licometa.me/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "从零开始的赛博老婆！4 - 短期记忆与记忆体系",
+      "item": "https://blog.licometa.me/posts/cybermate4/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "从零开始的赛博老婆！4 - 短期记忆与记忆体系",
+  "name": "从零开始的赛博老婆！4 - 短期记忆与记忆体系",
+  "description": " PIXIV: 94008036 @苏翼丶\nAgent记忆体系浅谈 （我写完这篇文章再重新回看，记忆这两个词太多了，我发现我不认识“记忆”这两个字了，大家点点赞吧写教程真的消耗阳寿……(｡ ́︿ ̀｡)\n从GPT3破圈那一刻起，大家对LLM的记忆体系就众说纷纭。从技术上来讲，一方面Transformer架构衍生出的一些技术促进了记忆体系的发展（如 Embedding/Vector Database），另一方面有需求催生了另一些技术（如 Graph Database）。但就从2023年发展到现在，Agent的记忆体系进展比较缓慢。\n我在这些技术和概念的帮助下，设计了一套针对于赛博老婆的记忆体系。它的特点就是自动存取，同时可以保证分级的持久化记忆。\n记忆概念分类 我想把赛博老婆的记忆体系分成三类：短期记忆，中期记忆，长期记忆。我们来分别解释这几个概念：\n短期记忆 短期记忆有多短期呢？我认为短期记忆是包含最丰富的，最原始的信息的。就像人的记忆一样，人类每天都会忘掉很多事情的很多细节，但是你可能会记得刚刚发生的事情的并能够说出细节。我认为在LLM还没有开始总结或简化那一部分最原始的记忆之前的内容，都算作短期记忆。或者通俗一点讲，对于赛博老婆，每一个会话的上下文，或者每一天当天（昨天）的记忆，都算作短期记忆。因为这一部分记忆，包含了你和赛博老婆交互的原始记录。但是在这里，我想稍微延伸一点：我把当天的总结记忆和每一次会话的记忆也算作短期记忆之内。之所以如此规定，是因为在实际的记忆载入中，这类的近期记忆往往频率更高，同时需要相对详细的细节，他们往往是一起无条件载入的。也就是说，上下文记忆，默认是必要的，而上几次的对话，或者昨天聊了什么，也会有更大概率被提起，他们的载入频率也差不多，都很高。\n会话：你和赛博老婆互动，聊了几句，然后你就去做别的事情了，比如说吃了个饭。当你吃完饭，可能已经过了会话超时时间，而你又不想继续之前的话题，而是聊点别的，于是赛博老婆就会开一个新的会话。这在后续的记忆结构化中有利于实体提取与记忆网的生成。\n中期记忆 中期记忆有别于短期记忆，中期记忆是经过简化和总结的，也就是丢弃掉了某些细节而得到的记忆。但我们为什么称之为中期记忆呢？这仍然是属于对人脑记忆的模仿，人脑会暂存一部分正在进行的事情，并简化其中的内容，等到这个事件结束了，有了结果了，就会大幅度遗忘，可能最后只会保留一个印象，类似于：我曾经做过什么事情，当时的结果是……而对曾经事情的过程和细节，完全遗忘。而这类中期记忆也不会对永久记忆网产生较大的影响。\n我们在这里举例说明：你在某个网购官方平台购买了一个全新显卡RTX 9090 Ti Super Plus Max Ultra 1024TB，你付款商家发货寄出快递。由于你一直心心念念这款超强的显卡，你一直记着有这么个快递在路上，于是没事儿就点开查询快递到哪里了。这就是属于中期记忆的“事件中”。过了几天，你的快递终于到了，你非常开心，迫不及待地拆了包装，安装上去，这时你可能已经忘记自己看了多少次快递跟踪了，也忘了它是几天内到达的，因为这个时候你很想把它安装到电脑上看看效果。这就是中期记忆的遗忘特性**，阶段性目标达成可能会遗忘掉很多细节，但是事件存在周期又远超“短期记忆”。你安装到了电脑，但是你发现用这个显卡跑LLM慢的要死，然后你惊讶的发现，由于某黄的精准刀法，RTX 9090 Ti Super Plus Max Ultra 1024TB虽然拥有超大的显存，但是其显存位宽却只有可怜的128bit——连下一代的10070 Ti Super Plus Max Ultra Gaming的升级版本的150bit都没有！在你不得不感叹某黄精准刀法的同时不由得骂：“Fxxk you Nvxdxa !!” 你很难过，在某海鲜市场折价出手，期间还没事就看一看某鱼，生怕买家到手刀或者无理由退款等逆天操作……终于，你是幸运的，你成功地卖出了显卡，这段风波画上句号。等到几年后你再想起这件事情，可能只会记得那印象深刻的阉割和那句“Fxxk you Nvxdxa !!”\n这就是中期记忆的特点了，不是所有记忆都会变成中期记忆的，只是某些特定事件，周期不短不长的才有资格被称为中期记忆。另外，上述案例是虚构的，绝对不是真实事件改编！！！\n长期记忆 好，终于聊到这里了。我们要开始加速了。\n人脑的长期记忆是一个非常复杂的系统。我们搞赛博老婆只能尽量平衡“精简”和“功能”。然而，赛博老婆可不像人，当你真的需要她回忆很重要的细节的时候，可不能像人一样，卖个萌然后糊弄过去。赛博老婆的长期记忆需要能够回溯到最原始的对话记忆或相关文档。同时，大多数情况，仅仅是一些关键信息的提示。这就对索引和查询系统提出了很高的要求，长期记忆系统设计的关键，就是如何高效而精确地自动存取，尤其是取。\n我把长期记忆的查询和索引分成两种模式，“模糊检索”和“关系检索”，对应RAG和Graph Query。这只是两种不同的检索方法，实际情况大多是混合的，也就是并行的。为什么要这么做呢？我们来看实际例子。\n模糊检索：你需要让赛博老婆回忆一下你曾经都在哪几天消费超过500元。这时，“超过500元”是一个语意，他是和价值/开支相关的，这种情况记忆执行的是语意数量的范围检索，是相对模糊的。（因为记忆库是通用的，我们没有一个专门的账本数据库，不然的话直接表达式\u0026gt;500就可以解决）此时，语意模糊检索占大头，而关系检索占小头，关系检索仅作为实体或后续进一步细节查询的补充。\n关系检索：你让你的赛博老婆帮你分析你自己现在的人际网并找出你人际网中其他人的潜在联系。此时，就会用到关系检索。关系检索依赖于图数据库，它会把记忆转化为实体并建立联系，当我们执行实体关系连锁检索时，Query的三元组会激活好几个初始节点，代表初始的查询实体。然后通过检索与这些实体相连接的其他实体的信息，返回结果。这时，与Query在时空上，或语意上或其他任何形式的关联，都会返回。后续可以进行多次的知识网跳跃或者进行网图归类重排，或者定位到某个范围很小的节点群，执行模糊检索等。\n在上述案例中，我们不难发现，两大类检索方式经常时混合使用的，这也是目前的趋势。实际上，短中长期记忆在实际应用里也是混合使用的，只是可能每一次调用时侧重点或者强度不同。\n记忆系统的相关技术 非关系型数据库（NoSQL） 例如MongoDB，作为一种非关系型数据库，在存储文本音频和图片等多媒体数据的时候很有用。因为我们所有的原始数据都存在这里，上级数据库溯源到这里，需要原始数据相对方便一点，后续更改添加条目，备份维护都比较简单。MongoDB的python SDK还是很不错的，同时Mongo DB部署的平台支持也不错。\n嵌入（Embedding） 一种数据量化技术，与图数据库和向量数据库配合，对多媒体数据进行多角度量化（语意，声学特征，图像特征等），便于数据库和LLM进行处理。\n向量数据库（Vector Database） 存储向量化的嵌入数据和对应的经过总结的二级数据，执行语意搜索，RAG，混合重排等。向量数据库很善于相似搜索，包括图片文本音频等。\n图数据库（Graph Database） 图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。\n",
+  "keywords": [
+    
+  ],
+  "articleBody": " PIXIV: 94008036 @苏翼丶\nAgent记忆体系浅谈 （我写完这篇文章再重新回看，记忆这两个词太多了，我发现我不认识“记忆”这两个字了，大家点点赞吧写教程真的消耗阳寿……(｡ ́︿ ̀｡)\n从GPT3破圈那一刻起，大家对LLM的记忆体系就众说纷纭。从技术上来讲，一方面Transformer架构衍生出的一些技术促进了记忆体系的发展（如 Embedding/Vector Database），另一方面有需求催生了另一些技术（如 Graph Database）。但就从2023年发展到现在，Agent的记忆体系进展比较缓慢。\n我在这些技术和概念的帮助下，设计了一套针对于赛博老婆的记忆体系。它的特点就是自动存取，同时可以保证分级的持久化记忆。\n记忆概念分类 我想把赛博老婆的记忆体系分成三类：短期记忆，中期记忆，长期记忆。我们来分别解释这几个概念：\n短期记忆 短期记忆有多短期呢？我认为短期记忆是包含最丰富的，最原始的信息的。就像人的记忆一样，人类每天都会忘掉很多事情的很多细节，但是你可能会记得刚刚发生的事情的并能够说出细节。我认为在LLM还没有开始总结或简化那一部分最原始的记忆之前的内容，都算作短期记忆。或者通俗一点讲，对于赛博老婆，每一个会话的上下文，或者每一天当天（昨天）的记忆，都算作短期记忆。因为这一部分记忆，包含了你和赛博老婆交互的原始记录。但是在这里，我想稍微延伸一点：我把当天的总结记忆和每一次会话的记忆也算作短期记忆之内。之所以如此规定，是因为在实际的记忆载入中，这类的近期记忆往往频率更高，同时需要相对详细的细节，他们往往是一起无条件载入的。也就是说，上下文记忆，默认是必要的，而上几次的对话，或者昨天聊了什么，也会有更大概率被提起，他们的载入频率也差不多，都很高。\n会话：你和赛博老婆互动，聊了几句，然后你就去做别的事情了，比如说吃了个饭。当你吃完饭，可能已经过了会话超时时间，而你又不想继续之前的话题，而是聊点别的，于是赛博老婆就会开一个新的会话。这在后续的记忆结构化中有利于实体提取与记忆网的生成。\n中期记忆 中期记忆有别于短期记忆，中期记忆是经过简化和总结的，也就是丢弃掉了某些细节而得到的记忆。但我们为什么称之为中期记忆呢？这仍然是属于对人脑记忆的模仿，人脑会暂存一部分正在进行的事情，并简化其中的内容，等到这个事件结束了，有了结果了，就会大幅度遗忘，可能最后只会保留一个印象，类似于：我曾经做过什么事情，当时的结果是……而对曾经事情的过程和细节，完全遗忘。而这类中期记忆也不会对永久记忆网产生较大的影响。\n我们在这里举例说明：你在某个网购官方平台购买了一个全新显卡RTX 9090 Ti Super Plus Max Ultra 1024TB，你付款商家发货寄出快递。由于你一直心心念念这款超强的显卡，你一直记着有这么个快递在路上，于是没事儿就点开查询快递到哪里了。这就是属于中期记忆的“事件中”。过了几天，你的快递终于到了，你非常开心，迫不及待地拆了包装，安装上去，这时你可能已经忘记自己看了多少次快递跟踪了，也忘了它是几天内到达的，因为这个时候你很想把它安装到电脑上看看效果。这就是中期记忆的遗忘特性**，阶段性目标达成可能会遗忘掉很多细节，但是事件存在周期又远超“短期记忆”。你安装到了电脑，但是你发现用这个显卡跑LLM慢的要死，然后你惊讶的发现，由于某黄的精准刀法，RTX 9090 Ti Super Plus Max Ultra 1024TB虽然拥有超大的显存，但是其显存位宽却只有可怜的128bit——连下一代的10070 Ti Super Plus Max Ultra Gaming的升级版本的150bit都没有！在你不得不感叹某黄精准刀法的同时不由得骂：“Fxxk you Nvxdxa !!” 你很难过，在某海鲜市场折价出手，期间还没事就看一看某鱼，生怕买家到手刀或者无理由退款等逆天操作……终于，你是幸运的，你成功地卖出了显卡，这段风波画上句号。等到几年后你再想起这件事情，可能只会记得那印象深刻的阉割和那句“Fxxk you Nvxdxa !!”\n这就是中期记忆的特点了，不是所有记忆都会变成中期记忆的，只是某些特定事件，周期不短不长的才有资格被称为中期记忆。另外，上述案例是虚构的，绝对不是真实事件改编！！！\n长期记忆 好，终于聊到这里了。我们要开始加速了。\n人脑的长期记忆是一个非常复杂的系统。我们搞赛博老婆只能尽量平衡“精简”和“功能”。然而，赛博老婆可不像人，当你真的需要她回忆很重要的细节的时候，可不能像人一样，卖个萌然后糊弄过去。赛博老婆的长期记忆需要能够回溯到最原始的对话记忆或相关文档。同时，大多数情况，仅仅是一些关键信息的提示。这就对索引和查询系统提出了很高的要求，长期记忆系统设计的关键，就是如何高效而精确地自动存取，尤其是取。\n我把长期记忆的查询和索引分成两种模式，“模糊检索”和“关系检索”，对应RAG和Graph Query。这只是两种不同的检索方法，实际情况大多是混合的，也就是并行的。为什么要这么做呢？我们来看实际例子。\n模糊检索：你需要让赛博老婆回忆一下你曾经都在哪几天消费超过500元。这时，“超过500元”是一个语意，他是和价值/开支相关的，这种情况记忆执行的是语意数量的范围检索，是相对模糊的。（因为记忆库是通用的，我们没有一个专门的账本数据库，不然的话直接表达式\u003e500就可以解决）此时，语意模糊检索占大头，而关系检索占小头，关系检索仅作为实体或后续进一步细节查询的补充。\n关系检索：你让你的赛博老婆帮你分析你自己现在的人际网并找出你人际网中其他人的潜在联系。此时，就会用到关系检索。关系检索依赖于图数据库，它会把记忆转化为实体并建立联系，当我们执行实体关系连锁检索时，Query的三元组会激活好几个初始节点，代表初始的查询实体。然后通过检索与这些实体相连接的其他实体的信息，返回结果。这时，与Query在时空上，或语意上或其他任何形式的关联，都会返回。后续可以进行多次的知识网跳跃或者进行网图归类重排，或者定位到某个范围很小的节点群，执行模糊检索等。\n在上述案例中，我们不难发现，两大类检索方式经常时混合使用的，这也是目前的趋势。实际上，短中长期记忆在实际应用里也是混合使用的，只是可能每一次调用时侧重点或者强度不同。\n记忆系统的相关技术 非关系型数据库（NoSQL） 例如MongoDB，作为一种非关系型数据库，在存储文本音频和图片等多媒体数据的时候很有用。因为我们所有的原始数据都存在这里，上级数据库溯源到这里，需要原始数据相对方便一点，后续更改添加条目，备份维护都比较简单。MongoDB的python SDK还是很不错的，同时Mongo DB部署的平台支持也不错。\n嵌入（Embedding） 一种数据量化技术，与图数据库和向量数据库配合，对多媒体数据进行多角度量化（语意，声学特征，图像特征等），便于数据库和LLM进行处理。\n向量数据库（Vector Database） 存储向量化的嵌入数据和对应的经过总结的二级数据，执行语意搜索，RAG，混合重排等。向量数据库很善于相似搜索，包括图片文本音频等。\n图数据库（Graph Database） 图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。\n其他相关技术 还有一些本项目的细节可能会用到，比如聚类，回归，Q学习，决策树，降维映射等等等等。由于本篇还算入门，这些内容等后续开对应进阶教程再说。（挖了无数深坑（;￣O￣））\n短期记忆实战 说了这么多，我们今天先来从相对简单的短期记忆开始实践。\n三种上下文记忆 这三个记忆类型实际上是继承了曾经Langchain的方式，但其实我们了解了方法之后，可以排列组合，根据不同的场景选择。\n上下文记忆 我们在第二篇文章中就已经引入了上下文记忆这个概念，在这里我们系统性地说一下。第一种上下文记忆是没有限制的，当你的程序在运行，只要后台不关，这个记忆列表就一直存在内存（RAM）里面，如果程序关闭，机器断电，上下文记忆就没了，所以不是持久记忆。而且第一种上下文是无限长的，聊的多，上下文就无限多，没有卸载机制，所以有很多隐患。这里仅放出代码：\n其实就是改了这个：\n# 把这个 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*4:-1]]) # 变成了这个 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history]) # 找不同 完整代码在这里：\nfrom openai import OpenAI chat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) chat_history = [] def get_response_from_llm(question): print(chat_history) # 没有了窗口，就是无限长的上下文，但是超出了LLM上下文最大限制会报错 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history]) chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] print(message) response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=message, temperature=0.7, ) response_str = response.choices[0].message.content return response_str if __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break chat_history.append(('human', user_input)) response = get_response_from_llm(user_input) chat_history.append(('ai', response)) print(response) 上下文窗口 # 变成这个就是窗口，也就是仅仅从列表中抽取最近的一部分上下文给LLM，数量固定，由最后面的表达式[-2*n:-1]决定 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*4:-1]]) 把n改变成任意数字，就可以控制上下文记忆的轮次了。比如你想让 AI 的记忆有 3 轮，那你就可以改成 [-7:-1]，因为一轮对话包含用户输入和机器人的回复条消息嘛，所以是 6 条消息。\n上下文摘要总结 简单来说，就是计数达到一定的轮次后，抽出来最近的那几条，然后对这个进行总结，减少token使用或者为了中期和长期记忆准备。LLM接受几个总结，并根据经过总结后的上下文继续对话。这种方法会舍弃一部分信息，特定情况使用。 我们首先按照之前的套路新加一个函数用于给聊天记录总结：\ndef summarize_chat_history(chat_history_window): \"\"\" 对最近的聊天记录进行总结 :param chat_history_window: 最近的聊天记录 :return: 总结后的字符串 \"\"\" # 创建总结提示 summary_prompt = f\"请总结以下对话内容：\\n{chat_history_window}\" print(f\"正在对以下内容生成总结: {summary_prompt}\") # 调用 LLM 生成总结 summary_response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=[{\"role\": \"user\", \"content\": summary_prompt}], temperature=0.7, ) # 获取总结内容 summary_str = summary_response.choices[0].message.content return summary_str 然后我们需要在之前的LLM响应函数里添加一些计数和判断，这样好把总结后的内容添加到prompt message里面：\n# 如果聊天记录达到总结阈值 if len(chat_history) \u003e= SUMMARY_THRESHOLD: # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-SUMMARY_THRESHOLD*2-1:-1]]) # 生成总结 summary = summarize_chat_history(chat_history_window) # 将总结添加到总结记录中 summary_history.append(summary) # 保留最后一条聊天记录 chat_history = chat_history[-1:] 这样的话，LLM响应函数会变成这样：\ndef get_response_from_llm(question): \"\"\" 获取 LLM 的响应 :param question: 用户的问题 :return: LLM 的响应 \"\"\" global chat_history, summary_history # 如果聊天记录达到总结阈值 if len(chat_history) \u003e= SUMMARY_THRESHOLD: # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-SUMMARY_THRESHOLD*2-1:-1]]) # 生成总结 summary = summarize_chat_history(chat_history_window) # 将总结添加到总结记录中 summary_history.append(summary) # 保留最后一条聊天记录 chat_history = chat_history[-1:] # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*SUMMARY_THRESHOLD:-1]]) chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" # 创建消息列表 message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] # 如果有总结记录，将其添加到消息列表中 if summary_history: summary_prompt = \"\\n\".join(summary_history) message.insert(1, {\"role\": \"assistant\", \"content\": f\"Summary of previous conversations:\\n{summary_prompt}\"}) # 调用 LLM 获取响应 response = chat_model.chat.completions.create( model='gpt-4o', messages=message, temperature=0.7, ) print(f\"message: {message}\") # 获取响应内容 response_str = response.choices[0].message.content return response_str 最后是完整的代码：\nfrom openai import OpenAI # 初始化 OpenAI 模型 chat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) # 聊天记录和总结记录的列表 chat_history = [] summary_history = [] SUMMARY_THRESHOLD = 4 # 定义达到多少轮次后进行总结 def summarize_chat_history(chat_history_window): \"\"\" 对最近的聊天记录进行总结 :param chat_history_window: 最近的聊天记录 :return: 总结后的字符串 \"\"\" # 创建总结提示 summary_prompt = f\"请总结以下对话内容：\\n{chat_history_window}\" print(f\"正在对以下内容生成总结: {summary_prompt}\") # 调用 LLM 生成总结 summary_response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=[{\"role\": \"user\", \"content\": summary_prompt}], temperature=0.7, ) # 获取总结内容 summary_str = summary_response.choices[0].message.content return summary_str def get_response_from_llm(question): \"\"\" 获取 LLM 的响应 :param question: 用户的问题 :return: LLM 的响应 \"\"\" global chat_history, summary_history # 如果聊天记录达到总结阈值 if len(chat_history) \u003e= SUMMARY_THRESHOLD: # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-SUMMARY_THRESHOLD*2-1:-1]]) # 生成总结 summary = summarize_chat_history(chat_history_window) # 将总结添加到总结记录中 summary_history.append(summary) # 保留最后一条聊天记录 chat_history = chat_history[-1:] # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*SUMMARY_THRESHOLD:-1]]) chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" # 创建消息列表 message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] # 如果有总结记录，将其添加到消息列表中 if summary_history: summary_prompt = \"\\n\".join(summary_history) message.insert(1, {\"role\": \"assistant\", \"content\": f\"Summary of previous conversations:\\n{summary_prompt}\"}) # 调用 LLM 获取响应 response = chat_model.chat.completions.create( model='gpt-4o', messages=message, temperature=0.7, ) print(f\"message: {message}\") # 获取响应内容 response_str = response.choices[0].message.content return response_str if __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break # 将用户输入添加到聊天记录中 chat_history.append(('human', user_input)) # 获取 LLM 的响应 response = get_response_from_llm(user_input) # 将 LLM 的响应添加到聊天记录中 chat_history.append(('ai', response)) # 打印 LLM 的响应 print(response) 数据库与记忆持久化 Mongo数据库部署 我们用Docker部署Mongo DB，大佬不限部署方式。我们暂时安装Docker Engine，你如果喜欢用桌面版的Desktop Docker，请你自行配置。这里大多使用Docker Engine命令行操作和Docker Compose。\n首先这里有官方的安装教程：Install Docker\n我们使用命令行CMD，依次输入每条指令：\n# Add Docker's official GPG key: sudo apt-get update sudo apt-get install ca-certificates curl sudo install -m 0755 -d /etc/apt/keyrings sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc sudo chmod a+r /etc/apt/keyrings/docker.asc # Add the repository to Apt sources: echo \\ \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \\ $(. /etc/os-release \u0026\u0026 echo \"$VERSION_CODENAME\") stable\" | \\ sudo tee /etc/apt/sources.list.d/docker.list \u003e /dev/null sudo apt-get update sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 如果不出意外的话，会提示docker安装成功的相关信息。\n安装成功后，运行这个命令测试你的docker是否正常安装：\nsudo docker run hello-world 如果正常，这个命令会打印输出确认信息并退出。命令行输入这条信息检测是否一起安装了compose，现在的docker都是默认带compose的，如果没有请自行安装。\nsudo docker compose version 在任意一个你能找到位置的路径新建一个目录，就命名为cyberai吧，我们将会在这里创建docker-compose.yaml文件，让容器管理更方便。\nsudo mkdir cyberai cd cyberai 然后用nano或者vim或者vscode新建一个docker-compose.yaml文件，我这里就直接用vim了，你用什么都可以，如果你是小白或者没有安装vim，那还是老老实实用vscode吧，能方便点。\nsudo vim docker-compose.yaml 然后复制这一段配置文件，再选中命令行CMD窗口，然后用快捷键粘贴就可以，如果无法粘贴，你可以按下键盘上的“i”键进入insert模式，你会发现命令行窗口左下角会有一个“insert”，然后再粘贴。\nversion: '3.8' # 指定 Docker Compose 文件的版本 services: mongodb: image: mongo:latest # 使用最新版本的 MongoDB 镜像 volumes: - ./data/db:/data/db # 将当前目录下 ./data/db 挂载到容器内的 /data/db 目录，用于持久化数据库数据 - ./data/backup:/data/backup # 将当前目录下 ./data/backup 挂载到容器内的 /data/backup 目录，用于备份数据 environment: - MONGO_INITDB_ROOT_USERNAME=admin # 设置 MongoDB 初始化的 root 用户名,可以自行更改 - MONGO_INITDB_ROOT_PASSWORD=secret # 设置 MongoDB 初始化的 root 用户密码,可以自行更改 networks: - internal_network # 将服务连接到名为 internal_network 的内部网络 restart: always # 设置容器在失败后自动重启 ports: - \"127.0.0.1:27017:27017\" # 将容器的 27017 端口映射到主机的 127.0.0.1:27017，只在本地暴露端口 networks: internal_network: driver: bridge # 定义一个名为 internal_network 的内部网络，使用 bridge 驱动 然后按下键盘上的ESC键，退出编辑模式，然后用键盘按下shift+；，就相当于打出一个冒号：，输入wq，然后回车。这一步就是写入保存，退出的意思。总结一下就是，按Esc，然后输入:wq，然后按下回车，就会退回到之前的命令行界面。\n我们每次启动关闭这个镜像的时候，你要么用这个docker-compose.yaml的绝对路径，你要么cd到这个yaml的文件夹内操作。要不然compose找不到yaml文件在哪里。我们在文件夹内，输入命令：\ndocker compose up -d 你会发现它开始下载镜像并解压，解压完成后会创建容器开始运行。\n你可以使用这些命令观察日志或管理容器：\n# 列出所有容器 docker ps -a # 实时显示容器的日志，ID或者名字从刚刚命令返回的列表里复制 docker logs -f \u003c容器ID或者容器名字\u003e # 关闭这个compose docker compose down 我们还需要安装对应的python pymongo库：\npip install pymongo 然后我们新建一个py文件，嗯，就叫它pymongo_test.py吧：\n# pip install pymongo import pymongo from pymongo import MongoClient import os def test_mongodb_connection(): # 从环境变量中获取 MongoDB 配置信息 mongo_host = os.getenv('MONGO_HOST', 'localhost') mongo_port = int(os.getenv('MONGO_PORT', 27017)) mongo_user = os.getenv('MONGO_USER', 'admin') mongo_password = os.getenv('MONGO_PASSWORD', 'secret') # 创建一个名字叫做 chat_history 的数据库 mongo_db_name = os.getenv('MONGO_DB_NAME', 'chat_history') # 创建 MongoDB 客户端 client = MongoClient( host=mongo_host, port=mongo_port, username=mongo_user, password=mongo_password ) try: # 连接到指定的数据库 db = client[mongo_db_name] # 插入一个文档到测试集合中 test_collection = db['daily'] test_document = {\"name\": \"test\", \"value\": 123} test_collection.insert_one(test_document) # 尝试获取集合列表以验证连接和插入操作 collections = db.list_collection_names() print(f\"成功连接到数据库 '{mongo_db_name}'，集合列表：{collections}\") except Exception as e: print(f\"连接到 MongoDB 数据库失败：{e}\") finally: # 关闭 MongoDB 客户端 client.close() if __name__ == \"__main__\": test_mongodb_connection() 我们运行他会得到一堆输出，如果没有报错就证明成功连接到数据库了。\n短期记忆与原始数据 我们已经准备好了外部数据库和LLM了。接下来我们要准备使用LLM对数据进行处理，然后存入数据库了。一部分存入的数据作为短期记忆，另一部分用于更高阶的数据库进行回溯和提炼用。\n我的方案是使用会话管理机制，有会话超时时间，比如我们规定，一次会话就是30分钟，如果超过了这个事件没有任何对话，后端就会把这个会话过期存档。当然这个超时时间我们是可以随意更改的。这样会有好处，那就是会话独立管理便于回溯和后期的检索/整理。\n随着功能模块逐渐变多，从现在开始，我们将会使用Python的自定义模块和类（Class）来定义不同的功能模块并把他们分类放在一起。这样便于后续的维护和添加功能/测试。\n自定义模块与类 我们是*“从零”*教程，所以这里简单介绍一下自定义模块和类，大佬请直接跳过即可。\n创建自定义模块 在Python中，自定义模块实际上就是一个包含Python代码的文件。通过创建自定义模块，你可以将相关的功能代码组织在一起，便于重用和维护。\n创建一个Python文件：首先，在你的项目目录下创建一个新的Python文件。文件名就是模块的名称。例如，创建一个名为mymodule.py的文件。\n编写模块代码：在该文件中，你可以定义函数、变量和类。例如：\n# mymodule.py def add(a, b): return a + b def subtract(a, b): return a - b class Calculator: def __init__(self): self.value = 0 def add(self, amount): self.value += amount def subtract(self, amount): self.value -= amount def get_value(self): return self.value 使用模块 要使用自定义模块，你需要在项目中的其他文件中导入它。假设你有一个名为main.py的文件想要使用mymodule中的功能：\n# main.py # 注意，如果你的自定义模块和主函数脚本文件不在同一个文件夹，你需要提供相对与main.py文件的相对路径，虽然Python编译的时候会自动搜索很多路径，但是为了避免问题，尽量使用准确的相对路径。 import mymodule # 使用函数 result = mymodule.add(5, 3) print(f\"Addition: {result}\") # 使用类，初始化一个叫calc的对象，名字随意，指向我们的自定义模块 calc = mymodule.Calculator() # 后续调用就直接用这个名字+我们类里面的函数名称，就好了 calc.add(10) calc.subtract(3) print(f\"Calculator Value: {calc.get_value()}\") 创建和使用类 类是Python中实现面向对象编程的基础。使用类，你可以创建对象来封装数据和功能。\n定义类 在Python中，定义类使用class关键字。下面是一个简单的类定义示例：\nclass Dog: def __init__(self, name, age): self.name = name self.age = age def bark(self): print(f\"{self.name} says woof!\") def get_age(self): return self.age 使用类 一旦定义了类，你可以创建该类的实例（对象）并使用它们的方法和属性：\n# 创建Dog类的实例 my_dog = Dog(\"Buddy\", 3) # 调用实例方法 my_dog.bark() # 输出: Buddy says woof （＾_＾）! # 获取属性 print(f\"My dog is {my_dog.get_age()} years old.\") 组织模块和类 将模块和类结合使用，可以为你的项目提供一个清晰的结构。每个模块可以包含一个或多个相关的类，这样可以使代码更易于管理。例如，你可以为每个主要功能创建一个模块，并在模块内部定义相关的类。接下来，我们就要自定义一个模块用于管理MongoDB数据库操作，我们会在这个模块里定义一个类，并在里面创建几个函数用于写入或者查询数据库。\n创建MongoDB自定义模块 我们要开始整理我们的项目文件夹了，请大家做好备份，无论你是用Git还是传统的复制副本，请一定要记得备份。\n我们在项目文件夹的根目录新建一个文件夹，就叫他cyberaimodules吧，我们将会在这个文件夹里创建自定义模块，并在主脚本里面导入它。\n我们的文件目录结构看起来像是这样：\nyour_project/ │ ├── main.py └── cyberaimodules/ ├── __init__.py ├── cyberaimongo.py # 我们将要创建的自定义模块，用于管理数据库操作 └── module2.py your_project/是你的项目的根目录。 main.py是主程序文件。 cyberaimodules/是我们自定义模块的目录。 __init__.py是一个特殊的文件，用来将cyberaimodules目录标识为一个Python包。虽然现在没有这个也能用但还是尽量加上，这个文件是空的，只需要新建这个文件，重命名，然后内容留空就好了。 cyberaimongo.py和module2.py是你在cyberai目录下创建的Python模块文件。 我们在cyberaimodules文件夹下新建一个cyberaimongo.py。这个模块用来管理mongo数据库，那它就必须要有三大核心功能：写入，查询和初始化。这里先导入我们需要的模块：\nimport json from pymongo import MongoClient import uuid from datetime import datetime 我们定义模块的初始化：\nclass MongoManager: def __init__(self, host='mongodb', port=27017, username='admin', password='secret', db_name='chat_history'): self.client = MongoClient(f'mongodb://{username}:{password}@{host}:{port}/') self.db = self.client[db_name] __init__ 的作用 自动初始化：当你创建一个 MongoManager 对象时，比如说 manager = MongoManager()，Python 会自动调用 __init__ 函数。这就像是开车时，你坐进车里，发动引擎，一切准备就绪。\n设置初始状态：__init__ 函数会为新创建的对象设置初始状态。它会把你传入的参数（如数据库地址、用户名、密码等）存储起来，以便后续使用。\n参数默认值：函数里设置了一些默认值，比如 host='mongodb' 和 port=27017。这意味着如果你没有特别指定这些参数，系统会使用这些默认值。这就像是你买了一台电视，出厂时已经调好了默认频道和音量，你不调整它也能正常使用。\nself 的作用 表示当前对象：self 是一个特殊的变量，它总是指向当前的对象实例。通过 self，我们可以在类的方法中访问和修改这个对象自己的属性。\n属性存储：当 __init__ 函数中写 self.client = ... 时，我们就是在给这个对象添加一个名为 client 的属性，并把 MongoDB 连接信息存储在这里。以后，任何时候你都可以通过这个对象（比如 manager.client）访问这个属性。\n保持一致性：self 确保你在对象的不同方法中都能访问到同样的数据。比如，self.db 是在 __init__ 里创建的，你可以在类的其他方法中随时用 self.db 来进行数据库操作。\n__init__ 和 self 就像是为一个新的物体（比如一个玩具车）装上了引擎、轮子和方向盘。__init__ 是组装的过程，把所有零件（参数）放到位，而 self 是确保你在任何时候都能找到和使用这些零件。通过这种方式，你创建的每一个 MongoManager 对象都是独立的，且已经准备好可以使用。\n我目前用的是json存聊天记录，如果你喜欢别的类型随意。\n我们创建一个函数用来预先生成将要存在数据库里的json：\ndef generate_chat_json(self, ai_reply, human_message, session_id, timestamp=None): \"\"\" 生成一个包含聊天信息的 JSON 字符串。 参数： - ai_reply (str): AI 的回复信息。 - human_message (str): 人类的消息。 - session_id (str): 会话的唯一标识符。 - timestamp (datetime, optional): 消息的时间戳。如果未提供，则使用当前时间。 返回： - str: 包含聊天信息的 JSON 字符串。 \"\"\" # 如果没有提供时间戳，则使用当前时间 if timestamp is None: timestamp = datetime.now() # 将时间戳格式化为字符串，格式为 ISO 8601（不带秒） timestamp_str = timestamp.strftime(\"%Y-%m-%dT%H:%M\") # 创建一个字典来存储聊天数据 chat_data = { 'message_id': str(uuid.uuid4()), # 生成一个唯一的消息ID 'ai_reply': ai_reply, # 存储AI的回复 'human_message': human_message, # 存储人类的消息 'timestamp': timestamp_str, # 存储格式化后的时间戳 'session_id': session_id # 存储会话ID } # 将字典转化为 JSON 字符串并返回 return json.dumps(chat_data, ensure_ascii=False, indent=4) # ensure_ascii=False 确保非 ASCII 字符（如中文）能够正确显示 # indent=4 使生成的 JSON 更加易读 接下来创建一个函数用于写入单次的对话记录到数据库：\ndef insert_chat(self, collection_name, ai_reply, human_message, session_id, timestamp=None): \"\"\" 将聊天记录插入到指定的 MongoDB 集合中。 参数： - collection_name (str): MongoDB 中集合的名称。 - ai_reply (str): AI 的回复信息。 - human_message (str): 人类的消息。 - session_id (str): 会话的唯一标识符。 - timestamp (datetime, optional): 消息的时间戳。如果未提供，则使用当前时间。 返回： - ObjectId: 插入的文档的唯一 ID。 \"\"\" # 生成聊天记录的 JSON 数据 json_data = self.generate_chat_json(self, ai_reply, human_message, session_id, timestamp) # 获取指定名称的集合对象 collection = self.db[collection_name] # 确保 json_data 是字典类型，以便插入到 MongoDB if isinstance(json_data, str): json_data = json.loads(json_data) # 插入聊天记录到集合中，并返回插入的文档ID return collection.insert_one(json_data).inserted_id 我们还要添加一些用于简单查询的函数：\n# 获取某个时间段内的所有数据 def get_mem_in_time_range(self, collection_name, start_time, end_time): \"\"\" 在指定的集合中获取某个时间段内的所有数据。 参数： - collection_name (str): 集合的名称。 - start_time (datetime): 起始时间。 - end_time (datetime): 结束时间。 返回： - list: 包含查询结果的列表。 \"\"\" collection = self.db[collection_name] # 使用 find 查询符合条件的文档 cursor = collection.find({ 'timestamp': { '$gte': start_time.isoformat(), '$lte': end_time.isoformat() } }) # 将查询结果转换为列表并返回 return list(cursor) # 根据 ID 获取数据 def get_data_by_id(self, collection_name, id): \"\"\" 在指定的集合中根据文档 ID 获取数据。 参数： - collection_name (str): 集合的名称。 - id (ObjectId): 文档的唯一 ID。 返回： - dict or None: 查询到的文档数据，如果未找到则返回 None。 \"\"\" collection = self.db[collection_name] # 使用 find_one 查询指定 ID 的文档 data = collection.find_one({'_id': id}) return data 最后整体代码看起来是这样：\nimport json import uuid from datetime import datetime from pymongo import MongoClient class MongoManager: def __init__(self, host='mongodb', port=27017, username='admin', password='secret', db_name='chat_history'): self.client = MongoClient(f'mongodb://{username}:{password}@{host}:{port}/') self.db = self.client[db_name] def generate_chat_json(self, ai_reply, human_message, session_id, timestamp=None): if timestamp is None: timestamp = datetime.now() timestamp_str = timestamp.strftime(\"%Y-%m-%dT%H:%M\") chat_data = { 'message_id': str(uuid.uuid4()), 'ai_reply': ai_reply, 'human_message': human_message, 'timestamp': timestamp_str, 'session_id': session_id } return json.dumps(chat_data, ensure_ascii=False, indent=4) def insert_chat(self, collection_name, ai_reply, human_message, session_id, timestamp=None): json_data = self.generate_chat_json(self, ai_reply, human_message, session_id, timestamp) collection = self.db[collection_name] if isinstance(json_data, str): json_data = json.loads(json_data) return collection.insert_one(json_data).inserted_id def get_mem_in_time_range(self, collection_name, start_time, end_time): collection = self.db[collection_name] cursor = collection.find({ 'timestamp': { '$gte': start_time.isoformat(), '$lte': end_time.isoformat() } }) return list(cursor) def get_data_by_id(self, collection_name, id): collection = self.db[collection_name] data = collection.find_one({'_id': id}) return data 好的，到目前为止，我们自定义模块就暂时告以段落了，下面我们将会在主函数里导入并使用它们。\nimport os import uuid # 导入之前创建的 cyberaimodules 模块 from cyberaimodules import cyberaimongo 这里我们暂时使用的测试用的环境变量，实际生产环境建议保存好敏感数据，避免直接将授权信息放在代码里。\n# 创建虚拟的环境变量暂时用来测试 mongo_host = os.getenv('MONGO_HOST', 'localhost') mongo_port = int(os.getenv('MONGO_PORT', 27017)) mongo_user = os.getenv('MONGO_USER', 'admin') mongo_password = os.getenv('MONGO_PASSWORD', 'secret') # 数据库的名字叫做 chat_history mongo_db_name = os.getenv('MONGO_DB_NAME', 'chat_history') # 初始化 MongoDB 客户端 mongo_manager = cyberaimongo.MongoManager( host=mongo_host, port=mongo_port, username=mongo_user, password=mongo_password, db_name=mongo_db_name, ) 然后我们先简单测试一下对话过程中单次对话的数据库写入操作，更复杂的会话与总结功能请等待下一篇。\n我们在get_response_from_llm这个函数里增加一点内容来测试一下刚刚的模块有没有正常工作（请注意你的Mongo DB对本地端口开放）：\n# 在llm回复后先尝试插入 本次聊天数据 chat_id = mongo_manager.insert_chat( collection_name='daily', ai_reply=response_str, human_message=question, # 先暂时生成一个会话ID测试，我们后续会根据超时时间进行处理会话 session_id=str(uuid.uuid4()), ) # 然后再使用返回的唯一chat_id查询这条对话，看看能不能回溯 query = mongo_manager.get_data_by_id( collection_name='daily', id=chat_id ) # 如果有，打印出来康康： if query: print(f\"Chat data: {query}\") 完整的代码看起来是这样：\n# main.py import os import uuid from openai import OpenAI # 导入之前创建的 cyberaimodules 模块 from cyberaimodules import cyberaimongo mongo_host = os.getenv('MONGO_HOST', 'localhost') mongo_port = int(os.getenv('MONGO_PORT', 27017)) mongo_user = os.getenv('MONGO_USER', 'admin') mongo_password = os.getenv('MONGO_PASSWORD', 'secret') # 数据库的名字叫做 chat_history mongo_db_name = os.getenv('MONGO_DB_NAME', 'chat_history') # 初始化 MongoDB 客户端 mongo_manager = cyberaimongo.MongoManager( host=mongo_host, port=mongo_port, username=mongo_user, password=mongo_password, db_name=mongo_db_name, ) # 初始化 OpenAI 模型 chat_model= OpenAI( # 你需要把这个替换成你的后端的API地址 base_url=\"https://api.openai.com/v1/\", # 这是用于身份验证的 API Key api_key = \"sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d\" ) # 聊天记录和总结记录的列表 chat_history = [] summary_history = [] SUMMARY_THRESHOLD = 4 # 定义达到多少轮次后进行总结 def summarize_chat_history(chat_history_window): \"\"\" 对最近的聊天记录进行总结 :param chat_history_window: 最近的聊天记录 :return: 总结后的字符串 \"\"\" # 创建总结提示 summary_prompt = f\"请总结以下对话内容：\\n{chat_history_window}\" print(f\"正在对以下内容生成总结: {summary_prompt}\") # 调用 LLM 生成总结 summary_response = chat_model.chat.completions.create( model='gpt-4o-mini', messages=[{\"role\": \"user\", \"content\": summary_prompt}], temperature=0.7, ) # 获取总结内容 summary_str = summary_response.choices[0].message.content return summary_str def get_response_from_llm(question): \"\"\" 获取 LLM 的响应 :param question: 用户的问题 :return: LLM 的响应 \"\"\" global chat_history, summary_history # 如果聊天记录达到总结阈值 if len(chat_history) \u003e= SUMMARY_THRESHOLD: # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-SUMMARY_THRESHOLD*2-1:-1]]) # 生成总结 summary = summarize_chat_history(chat_history_window) # 将总结添加到总结记录中 summary_history.append(summary) # 保留最后一条聊天记录 chat_history = chat_history[-1:] # 获取最近的聊天记录窗口 chat_history_window = \"\\n\".join([f\"{role}: {content}\" for role, content in chat_history[-2*SUMMARY_THRESHOLD:-1]]) chat_history_prompt = f\"Here is the chat history:\\n {chat_history_window}\" # 创建消息列表 message = [ {\"role\": \"system\", \"content\": \"You are a catgirl! Output in Chinese.\"}, {\"role\": \"assistant\", \"content\": chat_history_prompt}, {\"role\": \"user\", \"content\": question}, ] # 如果有总结记录，将其添加到消息列表中 if summary_history: summary_prompt = \"\\n\".join(summary_history) message.insert(1, {\"role\": \"assistant\", \"content\": f\"Summary of previous conversations:\\n{summary_prompt}\"}) # 调用 LLM 获取响应 response = chat_model.chat.completions.create( model='gpt-4o', messages=message, temperature=0.7, ) print(f\"message: {message}\") # 获取响应内容 response_str = response.choices[0].message.content chat_id = mongo_manager.insert_chat( collection_name='daily', ai_reply=response_str, human_message=question, session_id=str(uuid.uuid4()), ) query = mongo_manager.get_data_by_id( collection_name='daily', id=chat_id ) if query: print(f\"Chat data: {query}\") return response_str if __name__ == \"__main__\": while True: user_input = input(\"\\n输入问题或者请输入'exit'退出：\") if user_input.lower() == 'exit': print(\"再见\") break # 将用户输入添加到聊天记录中 chat_history.append(('human', user_input)) # 获取 LLM 的响应 response = get_response_from_llm(user_input) # 将 LLM 的响应添加到聊天记录中 chat_history.append(('ai', response)) # 打印 LLM 的响应 print(response) 到此，我们的记忆部分第一篇就大概结束了。下一篇我们将会在这个基础上，慢慢地把短期记忆和常态记忆加载聊完。大概就是，每一次LLM聊天的时候，会先记起昨天或者刚刚发生了什么事情，这样的话，我们的赛博老婆，就慢慢地拥有记忆了。祝你在赛博朋克的世界里玩得开心！\n",
+  "wordCount" : "1969",
+  "inLanguage": "en",
+  "datePublished": "2024-10-11T23:23:47-02:30",
+  "dateModified": "2024-10-11T23:23:47-02:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://blog.licometa.me/posts/cybermate4/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Cybermate!",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://blog.licometa.me/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://blog.licometa.me/" accesskey="h" title="Cybermate! (Alt + H)">Cybermate!</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://blog.licometa.me/archives/" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      从零开始的赛博老婆！4 - 短期记忆与记忆体系
+    </h1>
+    <div class="post-meta"><span title='2024-10-11 23:23:47 -0230 NDT'>October 11, 2024</span>&nbsp;·&nbsp;10 min
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#agent%e8%ae%b0%e5%bf%86%e4%bd%93%e7%b3%bb%e6%b5%85%e8%b0%88" aria-label="Agent记忆体系浅谈">Agent记忆体系浅谈</a><ul>
+                        
+                <li>
+                    <a href="#%e8%ae%b0%e5%bf%86%e6%a6%82%e5%bf%b5%e5%88%86%e7%b1%bb" aria-label="记忆概念分类">记忆概念分类</a><ul>
+                        
+                <li>
+                    <a href="#%e7%9f%ad%e6%9c%9f%e8%ae%b0%e5%bf%86" aria-label="短期记忆">短期记忆</a></li>
+                <li>
+                    <a href="#%e4%b8%ad%e6%9c%9f%e8%ae%b0%e5%bf%86" aria-label="中期记忆">中期记忆</a></li>
+                <li>
+                    <a href="#%e9%95%bf%e6%9c%9f%e8%ae%b0%e5%bf%86" aria-label="长期记忆">长期记忆</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e8%ae%b0%e5%bf%86%e7%b3%bb%e7%bb%9f%e7%9a%84%e7%9b%b8%e5%85%b3%e6%8a%80%e6%9c%af" aria-label="记忆系统的相关技术">记忆系统的相关技术</a><ul>
+                        
+                <li>
+                    <a href="#%e9%9d%9e%e5%85%b3%e7%b3%bb%e5%9e%8b%e6%95%b0%e6%8d%ae%e5%ba%93nosql" aria-label="非关系型数据库（NoSQL）">非关系型数据库（NoSQL）</a></li>
+                <li>
+                    <a href="#%e5%b5%8c%e5%85%a5embedding" aria-label="嵌入（Embedding）">嵌入（Embedding）</a></li>
+                <li>
+                    <a href="#%e5%90%91%e9%87%8f%e6%95%b0%e6%8d%ae%e5%ba%93vector-database" aria-label="向量数据库（Vector Database）">向量数据库（Vector Database）</a></li>
+                <li>
+                    <a href="#%e5%9b%be%e6%95%b0%e6%8d%ae%e5%ba%93graph-database" aria-label="图数据库（Graph Database）">图数据库（Graph Database）</a></li>
+                <li>
+                    <a href="#%e5%85%b6%e4%bb%96%e7%9b%b8%e5%85%b3%e6%8a%80%e6%9c%af" aria-label="其他相关技术">其他相关技术</a></li></ul>
+                </li></ul>
+                </li>
+                <li>
+                    <a href="#%e7%9f%ad%e6%9c%9f%e8%ae%b0%e5%bf%86%e5%ae%9e%e6%88%98" aria-label="短期记忆实战">短期记忆实战</a><ul>
+                        
+                <li>
+                    <a href="#%e4%b8%89%e7%a7%8d%e4%b8%8a%e4%b8%8b%e6%96%87%e8%ae%b0%e5%bf%86" aria-label="三种上下文记忆">三种上下文记忆</a><ul>
+                        
+                <li>
+                    <a href="#%e4%b8%8a%e4%b8%8b%e6%96%87%e8%ae%b0%e5%bf%86" aria-label="上下文记忆">上下文记忆</a></li>
+                <li>
+                    <a href="#%e4%b8%8a%e4%b8%8b%e6%96%87%e7%aa%97%e5%8f%a3" aria-label="上下文窗口">上下文窗口</a></li>
+                <li>
+                    <a href="#%e4%b8%8a%e4%b8%8b%e6%96%87%e6%91%98%e8%a6%81%e6%80%bb%e7%bb%93" aria-label="上下文摘要总结">上下文摘要总结</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e6%95%b0%e6%8d%ae%e5%ba%93%e4%b8%8e%e8%ae%b0%e5%bf%86%e6%8c%81%e4%b9%85%e5%8c%96" aria-label="数据库与记忆持久化">数据库与记忆持久化</a><ul>
+                        
+                <li>
+                    <a href="#mongo%e6%95%b0%e6%8d%ae%e5%ba%93%e9%83%a8%e7%bd%b2" aria-label="Mongo数据库部署">Mongo数据库部署</a></li>
+                <li>
+                    <a href="#%e7%9f%ad%e6%9c%9f%e8%ae%b0%e5%bf%86%e4%b8%8e%e5%8e%9f%e5%a7%8b%e6%95%b0%e6%8d%ae" aria-label="短期记忆与原始数据">短期记忆与原始数据</a></li>
+                <li>
+                    <a href="#%e8%87%aa%e5%ae%9a%e4%b9%89%e6%a8%a1%e5%9d%97%e4%b8%8e%e7%b1%bb" aria-label="自定义模块与类">自定义模块与类</a><ul>
+                        
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e8%87%aa%e5%ae%9a%e4%b9%89%e6%a8%a1%e5%9d%97" aria-label="创建自定义模块">创建自定义模块</a><ul>
+                        
+                <li>
+                    <a href="#%e4%bd%bf%e7%94%a8%e6%a8%a1%e5%9d%97" aria-label="使用模块">使用模块</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e5%92%8c%e4%bd%bf%e7%94%a8%e7%b1%bb" aria-label="创建和使用类">创建和使用类</a><ul>
+                        
+                <li>
+                    <a href="#%e5%ae%9a%e4%b9%89%e7%b1%bb" aria-label="定义类">定义类</a></li>
+                <li>
+                    <a href="#%e4%bd%bf%e7%94%a8%e7%b1%bb" aria-label="使用类">使用类</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e7%bb%84%e7%bb%87%e6%a8%a1%e5%9d%97%e5%92%8c%e7%b1%bb" aria-label="组织模块和类">组织模块和类</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%bamongodb%e8%87%aa%e5%ae%9a%e4%b9%89%e6%a8%a1%e5%9d%97" aria-label="创建MongoDB自定义模块">创建MongoDB自定义模块</a><ul>
+                        
+                <li>
+                    <a href="#__init__-%e7%9a%84%e4%bd%9c%e7%94%a8" aria-label="__init__ 的作用">__init__ 的作用</a></li>
+                <li>
+                    <a href="#self-%e7%9a%84%e4%bd%9c%e7%94%a8" aria-label="self 的作用">self 的作用</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="/images/94008036_p0_master1200.jpg" alt=""  />
+</p>
+<p>PIXIV: 94008036  @苏翼丶</p>
+<h1 id="agent记忆体系浅谈">Agent记忆体系浅谈<a hidden class="anchor" aria-hidden="true" href="#agent记忆体系浅谈">#</a></h1>
+<p>（我写完这篇文章再重新回看，记忆这两个词太多了，我发现我不认识“记忆”这两个字了，大家点点赞吧写教程真的消耗阳寿……(｡ ́︿ ̀｡)</p>
+<p>从GPT3破圈那一刻起，大家对LLM的记忆体系就众说纷纭。从技术上来讲，一方面Transformer架构衍生出的一些技术促进了记忆体系的发展（如 Embedding/Vector Database），另一方面有需求催生了另一些技术（如 Graph Database）。但就从2023年发展到现在，Agent的记忆体系进展比较缓慢。</p>
+<p>我在这些技术和概念的帮助下，设计了一套针对于赛博老婆的记忆体系。它的特点就是自动存取，同时可以保证分级的持久化记忆。</p>
+<h2 id="记忆概念分类">记忆概念分类<a hidden class="anchor" aria-hidden="true" href="#记忆概念分类">#</a></h2>
+<p>我想把赛博老婆的记忆体系分成三类：短期记忆，中期记忆，长期记忆。我们来分别解释这几个概念：</p>
+<h3 id="短期记忆">短期记忆<a hidden class="anchor" aria-hidden="true" href="#短期记忆">#</a></h3>
+<p>短期记忆有多短期呢？我认为短期记忆是包含最丰富的，最原始的信息的。就像人的记忆一样，人类每天都会忘掉很多事情的很多细节，但是你可能会记得刚刚发生的事情的并能够说出细节。我认为<strong>在LLM还没有开始<em>总结或简化</em>那一部分最原始的记忆之前的内容</strong>，都算作短期记忆。或者通俗一点讲，对于赛博老婆，<strong>每一个会话的上下文</strong>，或者<strong>每一天当天（昨天）的记忆</strong>，都算作短期记忆。因为这一部分记忆，包含了你和赛博老婆交互的原始记录。但是在这里，我想稍微延伸一点：我把当天的总结记忆和每一次会话的记忆也算作短期记忆之内。之所以如此规定，是因为在实际的记忆载入中，这类的近期记忆往往频率更高，同时需要相对详细的细节，他们往往是一起无条件载入的。也就是说，上下文记忆，默认是必要的，而上几次的对话，或者昨天聊了什么，也会有更大概率被提起，他们的载入频率也差不多，都很高。</p>
+<blockquote>
+<p><strong>会话：<strong>你和赛博老婆互动，聊了几句，然后你就去做别的事情了，比如说吃了个饭。当你吃完饭，可能已经过了会话超时时间，而你又不想继续之前的话题，而是聊点别的，于是赛博老婆就会开一个新的会话。这在后续的记忆结构化中有利于</strong>实体提取</strong>与<strong>记忆网</strong>的生成。</p>
+</blockquote>
+<h3 id="中期记忆">中期记忆<a hidden class="anchor" aria-hidden="true" href="#中期记忆">#</a></h3>
+<p>中期记忆有别于短期记忆，中期记忆是经过简化和总结的，也就是丢弃掉了某些细节而得到的记忆。但我们为什么称之为中期记忆呢？这仍然是属于对人脑记忆的模仿，人脑会暂存一部分正在进行的事情，并简化其中的内容，等到这个事件结束了，有了结果了，就会大幅度遗忘，可能最后只会保留一个印象，类似于：我曾经做过什么事情，当时的结果是……而对曾经事情的过程和细节，完全遗忘。而这类中期记忆也不会对永久记忆网产生较大的影响。</p>
+<p>我们在这里举例说明：你在某个网购官方平台购买了一个全新显卡RTX 9090 Ti Super Plus Max Ultra 1024TB，你付款商家发货寄出快递。由于你一直心心念念这款超强的显卡，你一直记着有这么个快递在路上，于是没事儿就点开查询快递到哪里了。<em><em>这就是属于中期记忆的</em>“事件中”</em><strong>。过了几天，你的快递终于到了，你非常开心，迫不及待地拆了包装，安装上去，这时你可能已经忘记自己看了多少次快递跟踪了，也忘了它是几天内到达的，因为这个时候你很想把它安装到电脑上看看效果。这就是中期记忆的</strong>遗忘特性**，<strong>阶段性目标达成</strong>可能会遗忘掉很多细节，但是事件存在周期又<strong>远超</strong>“短期记忆”。你安装到了电脑，但是你发现用这个显卡跑LLM慢的要死，然后你惊讶的发现，由于某黄的精准刀法，RTX 9090 Ti Super Plus Max Ultra 1024TB虽然拥有超大的显存，但是其显存位宽却只有可怜的<em>128bit</em>——连下一代的10070 Ti Super Plus Max Ultra Gaming的升级版本的<em>150bit</em>都没有！在你不得不感叹某黄精准刀法的同时不由得骂：“Fxxk you Nvxdxa !!” 你很难过，在某海鲜市场折价出手，期间还没事就看一看某鱼，生怕买家到手刀或者无理由退款等逆天操作……终于，你是幸运的，你成功地卖出了显卡，这段风波画上句号。等到几年后你再想起这件事情，可能只会记得那印象深刻的阉割和那句“Fxxk you Nvxdxa !!”</p>
+<p>这就是中期记忆的特点了，不是所有记忆都会变成中期记忆的，只是某些特定事件，周期不短不长的才有资格被称为中期记忆。另外，上述案例是虚构的，绝对不是真实事件改编！！！</p>
+<h3 id="长期记忆">长期记忆<a hidden class="anchor" aria-hidden="true" href="#长期记忆">#</a></h3>
+<p>好，终于聊到这里了。我们要开始加速了。</p>
+<p>人脑的长期记忆是一个非常复杂的系统。我们搞赛博老婆只能尽量<strong>平衡</strong>“精简”和“功能”。然而，赛博老婆可不像人，当你真的需要她回忆很重要的细节的时候，可不能像人一样，卖个萌然后糊弄过去。赛博老婆的长期记忆需要能够<strong>回溯</strong>到最原始的对话记忆或相关文档。同时，大多数情况，仅仅是一些<strong>关键信息</strong>的提示。这就对索引和查询系统提出了很高的要求，长期记忆系统设计的关键，就是如何<em><strong>高效而精确</strong></em>地自动存取，尤其是<em><strong>取</strong></em>。</p>
+<p>我把长期记忆的查询和索引分成两种模式，“模糊检索”和“关系检索”，对应RAG和Graph Query。这只是两种不同的检索方法，实际情况大多是混合的，也就是并行的。为什么要这么做呢？我们来看实际例子。</p>
+<p>模糊检索：你需要让赛博老婆回忆一下你曾经都在哪几天<strong>消费<em>超过</em>500</strong>元。这时，“超过500元”是一个语意，他是和价值/开支相关的，这种情况记忆执行的是语意数量的范围检索，是相对模糊的。（因为记忆库是通用的，我们没有一个专门的账本数据库，不然的话直接表达式&gt;500就可以解决）此时，语意模糊检索占大头，而关系检索占小头，关系检索仅作为实体或后续进一步细节查询的补充。</p>
+<p>关系检索：你让你的赛博老婆帮你分析你自己现在的<strong>人际网</strong>并找出你人际网中其他人的<strong>潜在联系</strong>。此时，就会用到关系检索。关系检索依赖于图数据库，它会把记忆转化为实体并建立联系，当我们执行实体关系连锁检索时，Query的三元组会激活好几个初始节点，代表初始的查询实体。然后通过检索与这些实体相连接的其他实体的信息，返回结果。这时，与Query在时空上，或语意上或其他任何形式的关联，都会返回。后续可以进行多次的知识网跳跃或者进行网图归类重排，或者定位到某个范围很小的节点群，执行模糊检索等。</p>
+<p>在上述案例中，我们不难发现，两大类检索方式经常时<strong>混合</strong>使用的，这也是目前的趋势。实际上，短中长期记忆在实际应用里也是混合使用的，只是可能每一次调用时<strong>侧重点</strong>或者<strong>强度</strong>不同。</p>
+<h2 id="记忆系统的相关技术">记忆系统的相关技术<a hidden class="anchor" aria-hidden="true" href="#记忆系统的相关技术">#</a></h2>
+<h3 id="非关系型数据库nosql">非关系型数据库（NoSQL）<a hidden class="anchor" aria-hidden="true" href="#非关系型数据库nosql">#</a></h3>
+<p>例如MongoDB，作为一种非关系型数据库，在存储文本音频和图片等多媒体数据的时候很有用。因为我们所有的原始数据都存在这里，上级数据库溯源到这里，需要原始数据相对方便一点，后续更改添加条目，备份维护都比较简单。MongoDB的python SDK还是很不错的，同时Mongo DB部署的平台支持也不错。</p>
+<h3 id="嵌入embedding">嵌入（Embedding）<a hidden class="anchor" aria-hidden="true" href="#嵌入embedding">#</a></h3>
+<p>一种数据量化技术，与图数据库和向量数据库配合，对多媒体数据进行多角度量化（语意，声学特征，图像特征等），便于数据库和LLM进行处理。</p>
+<h3 id="向量数据库vector-database">向量数据库（Vector Database）<a hidden class="anchor" aria-hidden="true" href="#向量数据库vector-database">#</a></h3>
+<p>存储向量化的嵌入数据和对应的经过总结的二级数据，执行语意搜索，RAG，混合重排等。向量数据库很善于相似搜索，包括图片文本音频等。</p>
+<h3 id="图数据库graph-database">图数据库（Graph Database）<a hidden class="anchor" aria-hidden="true" href="#图数据库graph-database">#</a></h3>
+<p>图数据库善于处理实体关系和网络。通过图数据库，LLM可以高效地存储和处理实体之间的关系网络，这对于需要理解和导航复杂关联的应用场景非常有用。另一个例子是知识图谱的构建，Agent可以利用图数据库存储知识点及其相互关联的信息，并结合互联网搜索帮助你发现新的潜在内容，甚至可以进行时空事件预测。</p>
+<h3 id="其他相关技术">其他相关技术<a hidden class="anchor" aria-hidden="true" href="#其他相关技术">#</a></h3>
+<p>还有一些本项目的细节可能会用到，比如聚类，回归，Q学习，决策树，降维映射等等等等。由于本篇还算入门，这些内容等后续开对应进阶教程再说。（挖了无数深坑（;￣O￣））</p>
+<h1 id="短期记忆实战">短期记忆实战<a hidden class="anchor" aria-hidden="true" href="#短期记忆实战">#</a></h1>
+<p>说了这么多，我们今天先来从相对简单的短期记忆开始实践。</p>
+<h2 id="三种上下文记忆">三种上下文记忆<a hidden class="anchor" aria-hidden="true" href="#三种上下文记忆">#</a></h2>
+<p>这三个记忆类型实际上是继承了曾经Langchain的方式，但其实我们了解了方法之后，可以排列组合，根据不同的场景选择。</p>
+<h3 id="上下文记忆">上下文记忆<a hidden class="anchor" aria-hidden="true" href="#上下文记忆">#</a></h3>
+<p>我们在第二篇文章中就已经引入了<strong>上下文记忆</strong>这个概念，在这里我们系统性地说一下。第一种上下文记忆是没有限制的，当你的程序在运行，只要后台不关，这个记忆列表就一直存在内存（RAM）里面，如果程序关闭，机器断电，上下文记忆就没了，所以不是<strong>持久记忆</strong>。而且第一种上下文是<strong>无限长</strong>的，聊的多，上下文就无限多，没有卸载机制，所以有很多隐患。这里仅放出代码：</p>
+<p>其实就是改了这个：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 把这个</span>
+</span></span><span style="display:flex;"><span>chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 变成了这个</span>
+</span></span><span style="display:flex;"><span>chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history])
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 找不同</span>
+</span></span></code></pre></div><p>完整代码在这里：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>chat_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(chat_history)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 没有了窗口，就是无限长的上下文，但是超出了LLM上下文最大限制会报错</span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history])
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(message)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>                model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>                messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>                temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>            )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;human&#39;</span>, user_input))
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;ai&#39;</span>, response))
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><h3 id="上下文窗口">上下文窗口<a hidden class="anchor" aria-hidden="true" href="#上下文窗口">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 变成这个就是窗口，也就是仅仅从列表中抽取最近的一部分上下文给LLM，数量固定，由最后面的表达式[-2*n:-1]决定</span>
+</span></span><span style="display:flex;"><span>chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span><span style="color:#ae81ff">4</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span></code></pre></div><p>把n改变成任意数字，就可以控制上下文记忆的轮次了。比如你想让 AI 的记忆有 3 轮，那你就可以改成 <code>[-7:-1]</code>，因为一轮对话包含用户输入和机器人的回复条消息嘛，所以是 6 条消息。</p>
+<h3 id="上下文摘要总结">上下文摘要总结<a hidden class="anchor" aria-hidden="true" href="#上下文摘要总结">#</a></h3>
+<p>简单来说，就是计数达到一定的轮次后，抽出来最近的那几条，然后对这个进行总结，减少token使用或者为了中期和长期记忆准备。LLM接受几个总结，并根据经过总结后的上下文继续对话。这种方法会舍弃一部分信息，特定情况使用。
+我们首先按照之前的套路新加一个函数用于给聊天记录总结：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">summarize_chat_history</span>(chat_history_window):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    对最近的聊天记录进行总结
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param chat_history_window: 最近的聊天记录
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: 总结后的字符串
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建总结提示</span>
+</span></span><span style="display:flex;"><span>    summary_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;请总结以下对话内容：</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;正在对以下内容生成总结: </span><span style="color:#e6db74">{</span>summary_prompt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用 LLM 生成总结</span>
+</span></span><span style="display:flex;"><span>    summary_response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>[{<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: summary_prompt}],
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取总结内容</span>
+</span></span><span style="display:flex;"><span>    summary_str <span style="color:#f92672">=</span> summary_response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> summary_str
+</span></span></code></pre></div><p>然后我们需要在之前的LLM响应函数里<strong>添加</strong>一些<strong>计数和判断</strong>，这样好把总结后的内容添加到prompt message里面：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>    <span style="color:#75715e"># 如果聊天记录达到总结阈值</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(chat_history) <span style="color:#f92672">&gt;=</span> SUMMARY_THRESHOLD:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>        chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span>SUMMARY_THRESHOLD<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 生成总结</span>
+</span></span><span style="display:flex;"><span>        summary <span style="color:#f92672">=</span> summarize_chat_history(chat_history_window)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将总结添加到总结记录中</span>
+</span></span><span style="display:flex;"><span>        summary_history<span style="color:#f92672">.</span>append(summary)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 保留最后一条聊天记录</span>
+</span></span><span style="display:flex;"><span>        chat_history <span style="color:#f92672">=</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:]
+</span></span></code></pre></div><p>这样的话，LLM响应函数会变成这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    获取 LLM 的响应
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param question: 用户的问题
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: LLM 的响应
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">global</span> chat_history, summary_history
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果聊天记录达到总结阈值</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(chat_history) <span style="color:#f92672">&gt;=</span> SUMMARY_THRESHOLD:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>        chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span>SUMMARY_THRESHOLD<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 生成总结</span>
+</span></span><span style="display:flex;"><span>        summary <span style="color:#f92672">=</span> summarize_chat_history(chat_history_window)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将总结添加到总结记录中</span>
+</span></span><span style="display:flex;"><span>        summary_history<span style="color:#f92672">.</span>append(summary)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 保留最后一条聊天记录</span>
+</span></span><span style="display:flex;"><span>        chat_history <span style="color:#f92672">=</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>SUMMARY_THRESHOLD:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建消息列表</span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果有总结记录，将其添加到消息列表中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> summary_history:
+</span></span><span style="display:flex;"><span>        summary_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join(summary_history)
+</span></span><span style="display:flex;"><span>        message<span style="color:#f92672">.</span>insert(<span style="color:#ae81ff">1</span>, {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Summary of previous conversations:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>summary_prompt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用 LLM 获取响应</span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o&#39;</span>,
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;message: </span><span style="color:#e6db74">{</span>message<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取响应内容</span>
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span></code></pre></div><p>最后是完整的代码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化 OpenAI 模型</span>
+</span></span><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 聊天记录和总结记录的列表</span>
+</span></span><span style="display:flex;"><span>chat_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>summary_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>SUMMARY_THRESHOLD <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>  <span style="color:#75715e"># 定义达到多少轮次后进行总结</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">summarize_chat_history</span>(chat_history_window):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    对最近的聊天记录进行总结
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param chat_history_window: 最近的聊天记录
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: 总结后的字符串
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建总结提示</span>
+</span></span><span style="display:flex;"><span>    summary_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;请总结以下对话内容：</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;正在对以下内容生成总结: </span><span style="color:#e6db74">{</span>summary_prompt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用 LLM 生成总结</span>
+</span></span><span style="display:flex;"><span>    summary_response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>[{<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: summary_prompt}],
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取总结内容</span>
+</span></span><span style="display:flex;"><span>    summary_str <span style="color:#f92672">=</span> summary_response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> summary_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    获取 LLM 的响应
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param question: 用户的问题
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: LLM 的响应
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">global</span> chat_history, summary_history
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果聊天记录达到总结阈值</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(chat_history) <span style="color:#f92672">&gt;=</span> SUMMARY_THRESHOLD:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>        chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span>SUMMARY_THRESHOLD<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 生成总结</span>
+</span></span><span style="display:flex;"><span>        summary <span style="color:#f92672">=</span> summarize_chat_history(chat_history_window)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将总结添加到总结记录中</span>
+</span></span><span style="display:flex;"><span>        summary_history<span style="color:#f92672">.</span>append(summary)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 保留最后一条聊天记录</span>
+</span></span><span style="display:flex;"><span>        chat_history <span style="color:#f92672">=</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>SUMMARY_THRESHOLD:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建消息列表</span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果有总结记录，将其添加到消息列表中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> summary_history:
+</span></span><span style="display:flex;"><span>        summary_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join(summary_history)
+</span></span><span style="display:flex;"><span>        message<span style="color:#f92672">.</span>insert(<span style="color:#ae81ff">1</span>, {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Summary of previous conversations:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>summary_prompt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用 LLM 获取响应</span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o&#39;</span>,
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;message: </span><span style="color:#e6db74">{</span>message<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取响应内容</span>
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将用户输入添加到聊天记录中</span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;human&#39;</span>, user_input))
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取 LLM 的响应</span>
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将 LLM 的响应添加到聊天记录中</span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;ai&#39;</span>, response))
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 打印 LLM 的响应</span>
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><h2 id="数据库与记忆持久化">数据库与记忆持久化<a hidden class="anchor" aria-hidden="true" href="#数据库与记忆持久化">#</a></h2>
+<h3 id="mongo数据库部署">Mongo数据库部署<a hidden class="anchor" aria-hidden="true" href="#mongo数据库部署">#</a></h3>
+<p>我们用Docker部署Mongo DB，大佬不限部署方式。我们暂时安装Docker Engine，你如果喜欢用桌面版的Desktop Docker，请你自行配置。这里大多使用Docker Engine命令行操作和Docker Compose。</p>
+<p>首先这里有官方的安装教程：<a href="https://docs.docker.com/engine/install/">Install Docker</a></p>
+<p>我们使用命令行CMD，依次输入每条指令：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># Add Docker&#39;s official GPG key:</span>
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install ca-certificates curl
+</span></span><span style="display:flex;"><span>sudo install -m <span style="color:#ae81ff">0755</span> -d /etc/apt/keyrings
+</span></span><span style="display:flex;"><span>sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+</span></span><span style="display:flex;"><span>sudo chmod a+r /etc/apt/keyrings/docker.asc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Add the repository to Apt sources:</span>
+</span></span><span style="display:flex;"><span>echo <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;deb [arch=</span><span style="color:#66d9ef">$(</span>dpkg --print-architecture<span style="color:#66d9ef">)</span><span style="color:#e6db74"> signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  </span><span style="color:#66d9ef">$(</span>. /etc/os-release <span style="color:#f92672">&amp;&amp;</span> echo <span style="color:#e6db74">&#34;</span>$VERSION_CODENAME<span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">)</span><span style="color:#e6db74"> stable&#34;</span> | <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+</span></span></code></pre></div><p>如果不出意外的话，会提示docker安装成功的相关信息。</p>
+<p>安装成功后，运行这个命令测试你的docker是否正常安装：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo docker run hello-world
+</span></span></code></pre></div><p>如果正常，这个命令会打印输出确认信息并退出。命令行输入这条信息检测是否一起安装了compose，现在的docker都是默认带compose的，如果没有请自行安装。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo docker compose version
+</span></span></code></pre></div><p>在任意一个你能找到位置的路径新建一个目录，就命名为cyberai吧，我们将会在这里创建<code>docker-compose.yaml</code>文件，让容器管理更方便。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo mkdir cyberai
+</span></span><span style="display:flex;"><span>cd cyberai
+</span></span></code></pre></div><p>然后用nano或者vim或者vscode新建一个<code>docker-compose.yaml</code>文件，我这里就直接用vim了，你用什么都可以，如果你是小白或者没有安装vim，那还是老老实实用vscode吧，能方便点。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo vim docker-compose.yaml
+</span></span></code></pre></div><p>然后复制这一段配置文件，再选中命令行CMD窗口，然后用快捷键粘贴就可以，如果无法粘贴，你可以按下键盘上的“i”键进入insert模式，你会发现命令行窗口左下角会有一个“insert”，然后再粘贴。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;3.8&#39;</span>  <span style="color:#75715e"># 指定 Docker Compose 文件的版本</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">mongodb</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">mongo:latest </span> <span style="color:#75715e"># 使用最新版本的 MongoDB 镜像</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">./data/db:/data/db </span> <span style="color:#75715e"># 将当前目录下 ./data/db 挂载到容器内的 /data/db 目录，用于持久化数据库数据</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">./data/backup:/data/backup </span> <span style="color:#75715e"># 将当前目录下 ./data/backup 挂载到容器内的 /data/backup 目录，用于备份数据</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">MONGO_INITDB_ROOT_USERNAME=admin </span> <span style="color:#75715e"># 设置 MongoDB 初始化的 root 用户名,可以自行更改</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">MONGO_INITDB_ROOT_PASSWORD=secret </span> <span style="color:#75715e"># 设置 MongoDB 初始化的 root 用户密码,可以自行更改</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">internal_network </span> <span style="color:#75715e"># 将服务连接到名为 internal_network 的内部网络</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">always </span> <span style="color:#75715e"># 设置容器在失败后自动重启</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;127.0.0.1:27017:27017&#34;</span>  <span style="color:#75715e"># 将容器的 27017 端口映射到主机的 127.0.0.1:27017，只在本地暴露端口</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">networks</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">internal_network</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">driver</span>: <span style="color:#ae81ff">bridge </span> <span style="color:#75715e"># 定义一个名为 internal_network 的内部网络，使用 bridge 驱动</span>
+</span></span></code></pre></div><p>然后按下键盘上的ESC键，退出编辑模式，然后用键盘按下shift+；，就相当于打出一个冒号：，输入wq，然后回车。这一步就是写入保存，退出的意思。总结一下就是，按Esc，然后输入<code>:wq</code>，然后按下回车，就会退回到之前的命令行界面。</p>
+<p>我们每次启动关闭这个镜像的时候，你要么用这个<code>docker-compose.yaml</code>的绝对路径，你要么cd到这个yaml的文件夹内操作。要不然compose找不到yaml文件在哪里。我们在文件夹内，输入命令：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>docker compose up -d
+</span></span></code></pre></div><p>你会发现它开始下载镜像并解压，解压完成后会创建容器开始运行。</p>
+<p>你可以使用这些命令观察日志或管理容器：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span><span style="color:#75715e"># 列出所有容器</span>
+</span></span><span style="display:flex;"><span>docker ps -a
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 实时显示容器的日志，ID或者名字从刚刚命令返回的列表里复制</span>
+</span></span><span style="display:flex;"><span>docker logs -f &lt;容器ID或者容器名字&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 关闭这个compose</span>
+</span></span><span style="display:flex;"><span>docker compose down
+</span></span></code></pre></div><p>我们还需要安装对应的python pymongo库：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>pip install pymongo
+</span></span></code></pre></div><p>然后我们新建一个py文件，嗯，就叫它<code>pymongo_test.py</code>吧：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># pip install pymongo</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pymongo
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pymongo <span style="color:#f92672">import</span> MongoClient
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test_mongodb_connection</span>():
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 从环境变量中获取 MongoDB 配置信息</span>
+</span></span><span style="display:flex;"><span>    mongo_host <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_HOST&#39;</span>, <span style="color:#e6db74">&#39;localhost&#39;</span>)
+</span></span><span style="display:flex;"><span>    mongo_port <span style="color:#f92672">=</span> int(os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_PORT&#39;</span>, <span style="color:#ae81ff">27017</span>))
+</span></span><span style="display:flex;"><span>    mongo_user <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_USER&#39;</span>, <span style="color:#e6db74">&#39;admin&#39;</span>)
+</span></span><span style="display:flex;"><span>    mongo_password <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_PASSWORD&#39;</span>, <span style="color:#e6db74">&#39;secret&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建一个名字叫做 chat_history 的数据库</span>
+</span></span><span style="display:flex;"><span>    mongo_db_name <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_DB_NAME&#39;</span>, <span style="color:#e6db74">&#39;chat_history&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建 MongoDB 客户端</span>
+</span></span><span style="display:flex;"><span>    client <span style="color:#f92672">=</span> MongoClient(
+</span></span><span style="display:flex;"><span>        host<span style="color:#f92672">=</span>mongo_host,
+</span></span><span style="display:flex;"><span>        port<span style="color:#f92672">=</span>mongo_port,
+</span></span><span style="display:flex;"><span>        username<span style="color:#f92672">=</span>mongo_user,
+</span></span><span style="display:flex;"><span>        password<span style="color:#f92672">=</span>mongo_password
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 连接到指定的数据库</span>
+</span></span><span style="display:flex;"><span>            db <span style="color:#f92672">=</span> client[mongo_db_name]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 插入一个文档到测试集合中</span>
+</span></span><span style="display:flex;"><span>            test_collection <span style="color:#f92672">=</span> db[<span style="color:#e6db74">&#39;daily&#39;</span>]
+</span></span><span style="display:flex;"><span>            test_document <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;test&#34;</span>, <span style="color:#e6db74">&#34;value&#34;</span>: <span style="color:#ae81ff">123</span>}
+</span></span><span style="display:flex;"><span>            test_collection<span style="color:#f92672">.</span>insert_one(test_document)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e"># 尝试获取集合列表以验证连接和插入操作</span>
+</span></span><span style="display:flex;"><span>            collections <span style="color:#f92672">=</span> db<span style="color:#f92672">.</span>list_collection_names()
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;成功连接到数据库 &#39;</span><span style="color:#e6db74">{</span>mongo_db_name<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;，集合列表：</span><span style="color:#e6db74">{</span>collections<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;连接到 MongoDB 数据库失败：</span><span style="color:#e6db74">{</span>e<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">finally</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 关闭 MongoDB 客户端</span>
+</span></span><span style="display:flex;"><span>        client<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    test_mongodb_connection()
+</span></span></code></pre></div><p>我们运行他会得到一堆输出，如果没有报错就证明成功连接到数据库了。</p>
+<h3 id="短期记忆与原始数据">短期记忆与原始数据<a hidden class="anchor" aria-hidden="true" href="#短期记忆与原始数据">#</a></h3>
+<p>我们已经准备好了外部数据库和LLM了。接下来我们要准备使用LLM对数据进行处理，然后存入数据库了。一部分存入的数据作为短期记忆，另一部分用于更高阶的数据库进行回溯和提炼用。</p>
+<p>我的方案是使用会话管理机制，有会话超时时间，比如我们规定，一次会话就是30分钟，如果超过了这个事件没有任何对话，后端就会把这个会话过期存档。当然这个超时时间我们是可以随意更改的。这样会有好处，那就是会话独立管理便于回溯和后期的检索/整理。</p>
+<p>随着功能模块逐渐变多，从现在开始，我们将会使用Python的自定义模块和类（Class）来定义不同的功能模块并把他们分类放在一起。这样便于后续的维护和添加功能/测试。</p>
+<h3 id="自定义模块与类">自定义模块与类<a hidden class="anchor" aria-hidden="true" href="#自定义模块与类">#</a></h3>
+<p>我们是*“从零”*教程，所以这里简单介绍一下自定义模块和类，大佬请直接跳过即可。</p>
+<h4 id="创建自定义模块">创建自定义模块<a hidden class="anchor" aria-hidden="true" href="#创建自定义模块">#</a></h4>
+<p>在Python中，自定义模块实际上就是一个包含Python代码的文件。通过创建自定义模块，你可以将相关的功能代码组织在一起，便于重用和维护。</p>
+<ol>
+<li>
+<p><strong>创建一个Python文件</strong>：首先，在你的项目目录下创建一个新的Python文件。文件名就是模块的名称。例如，创建一个名为<code>mymodule.py</code>的文件。</p>
+</li>
+<li>
+<p><strong>编写模块代码</strong>：在该文件中，你可以定义函数、变量和类。例如：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># mymodule.py</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">subtract</span>(a, b):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">-</span> b
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Calculator</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>value <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(self, amount):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>value <span style="color:#f92672">+=</span> amount
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">subtract</span>(self, amount):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>value <span style="color:#f92672">-=</span> amount
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_value</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>value
+</span></span></code></pre></div></li>
+</ol>
+<h5 id="使用模块">使用模块<a hidden class="anchor" aria-hidden="true" href="#使用模块">#</a></h5>
+<p>要使用自定义模块，你需要在项目中的其他文件中导入它。假设你有一个名为<code>main.py</code>的文件想要使用<code>mymodule</code>中的功能：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># main.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 注意，如果你的自定义模块和主函数脚本文件不在同一个文件夹，你需要提供相对与main.py文件的相对路径，虽然Python编译的时候会自动搜索很多路径，但是为了避免问题，尽量使用准确的相对路径。</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> mymodule
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用函数</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span> mymodule<span style="color:#f92672">.</span>add(<span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Addition: </span><span style="color:#e6db74">{</span>result<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 使用类，初始化一个叫calc的对象，名字随意，指向我们的自定义模块</span>
+</span></span><span style="display:flex;"><span>calc <span style="color:#f92672">=</span> mymodule<span style="color:#f92672">.</span>Calculator()
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 后续调用就直接用这个名字+我们类里面的函数名称，就好了</span>
+</span></span><span style="display:flex;"><span>calc<span style="color:#f92672">.</span>add(<span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>calc<span style="color:#f92672">.</span>subtract(<span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Calculator Value: </span><span style="color:#e6db74">{</span>calc<span style="color:#f92672">.</span>get_value()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span></code></pre></div><h4 id="创建和使用类">创建和使用类<a hidden class="anchor" aria-hidden="true" href="#创建和使用类">#</a></h4>
+<p>类是Python中实现面向对象编程的基础。使用类，你可以创建对象来封装数据和功能。</p>
+<h5 id="定义类">定义类<a hidden class="anchor" aria-hidden="true" href="#定义类">#</a></h5>
+<p>在Python中，定义类使用<code>class</code>关键字。下面是一个简单的类定义示例：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Dog</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, name, age):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>name <span style="color:#f92672">=</span> name
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>age <span style="color:#f92672">=</span> age
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">bark</span>(self):
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>self<span style="color:#f92672">.</span>name<span style="color:#e6db74">}</span><span style="color:#e6db74"> says woof!&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_age</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>age
+</span></span></code></pre></div><h5 id="使用类">使用类<a hidden class="anchor" aria-hidden="true" href="#使用类">#</a></h5>
+<p>一旦定义了类，你可以创建该类的实例（对象）并使用它们的方法和属性：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 创建Dog类的实例</span>
+</span></span><span style="display:flex;"><span>my_dog <span style="color:#f92672">=</span> Dog(<span style="color:#e6db74">&#34;Buddy&#34;</span>, <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 调用实例方法</span>
+</span></span><span style="display:flex;"><span>my_dog<span style="color:#f92672">.</span>bark()  <span style="color:#75715e"># 输出: Buddy says woof （＾_＾）!</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 获取属性</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;My dog is </span><span style="color:#e6db74">{</span>my_dog<span style="color:#f92672">.</span>get_age()<span style="color:#e6db74">}</span><span style="color:#e6db74"> years old.&#34;</span>)
+</span></span></code></pre></div><h4 id="组织模块和类">组织模块和类<a hidden class="anchor" aria-hidden="true" href="#组织模块和类">#</a></h4>
+<p>将模块和类结合使用，可以为你的项目提供一个清晰的结构。每个模块可以包含一个或多个相关的类，这样可以使代码更易于管理。例如，你可以为每个主要功能创建一个模块，并在模块内部定义相关的类。接下来，我们就要自定义一个模块用于管理MongoDB数据库操作，我们会在这个模块里定义一个类，并在里面创建几个函数用于写入或者查询数据库。</p>
+<h3 id="创建mongodb自定义模块">创建MongoDB自定义模块<a hidden class="anchor" aria-hidden="true" href="#创建mongodb自定义模块">#</a></h3>
+<p>我们要开始整理我们的项目文件夹了，请大家做好备份，无论你是用Git还是传统的复制副本，请一定要记得备份。</p>
+<p>我们在项目文件夹的根目录新建一个文件夹，就叫他<code>cyberaimodules</code>吧，我们将会在这个文件夹里创建自定义模块，并在主脚本里面导入它。</p>
+<p>我们的文件目录结构看起来像是这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>your_project/
+</span></span><span style="display:flex;"><span>│
+</span></span><span style="display:flex;"><span>├── main.py
+</span></span><span style="display:flex;"><span>└── cyberaimodules/
+</span></span><span style="display:flex;"><span>    ├── __init__.py
+</span></span><span style="display:flex;"><span>    ├── cyberaimongo.py # 我们将要创建的自定义模块，用于管理数据库操作
+</span></span><span style="display:flex;"><span>    └── module2.py
+</span></span></code></pre></div><ul>
+<li><code>your_project/</code>是你的项目的根目录。</li>
+<li><code>main.py</code>是主程序文件。</li>
+<li><code>cyberaimodules/</code>是我们自定义模块的目录。</li>
+<li><code>__init__.py</code>是一个特殊的文件，用来将<code>cyberaimodules</code>目录标识为一个Python包。虽然现在没有这个也能用但还是尽量加上，这个文件是空的，只需要新建这个文件，重命名，然后内容留空就好了。</li>
+<li><code>cyberaimongo.py</code>和<code>module2.py</code>是你在<code>cyberai</code>目录下创建的Python模块文件。</li>
+</ul>
+<p>我们在<code>cyberaimodules</code>文件夹下新建一个<code>cyberaimongo.py</code>。这个模块用来管理mongo数据库，那它就必须要有三大核心功能：写入，查询和初始化。这里先导入我们需要的模块：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pymongo <span style="color:#f92672">import</span> MongoClient
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> uuid
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime
+</span></span></code></pre></div><p>我们定义模块的初始化：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MongoManager</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, host<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;mongodb&#39;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">27017</span>, username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;admin&#39;</span>, password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;secret&#39;</span>, db_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;chat_history&#39;</span>):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>client <span style="color:#f92672">=</span> MongoClient(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;mongodb://</span><span style="color:#e6db74">{</span>username<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>password<span style="color:#e6db74">}</span><span style="color:#e6db74">@</span><span style="color:#e6db74">{</span>host<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>port<span style="color:#e6db74">}</span><span style="color:#e6db74">/&#39;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>db <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>client[db_name]
+</span></span></code></pre></div><h4 id="__init__-的作用"><code>__init__</code> 的作用<a hidden class="anchor" aria-hidden="true" href="#__init__-的作用">#</a></h4>
+<ul>
+<li>
+<p><strong>自动初始化</strong>：当你创建一个 <code>MongoManager</code> 对象时，比如说 <code>manager = MongoManager()</code>，Python 会自动调用 <code>__init__</code> 函数。这就像是开车时，你坐进车里，发动引擎，一切准备就绪。</p>
+</li>
+<li>
+<p><strong>设置初始状态</strong>：<code>__init__</code> 函数会为新创建的对象设置初始状态。它会把你传入的参数（如数据库地址、用户名、密码等）存储起来，以便后续使用。</p>
+</li>
+<li>
+<p><strong>参数默认值</strong>：函数里设置了一些默认值，比如 <code>host='mongodb'</code> 和 <code>port=27017</code>。这意味着如果你没有特别指定这些参数，系统会使用这些默认值。这就像是你买了一台电视，出厂时已经调好了默认频道和音量，你不调整它也能正常使用。</p>
+</li>
+</ul>
+<h4 id="self-的作用"><code>self</code> 的作用<a hidden class="anchor" aria-hidden="true" href="#self-的作用">#</a></h4>
+<ul>
+<li>
+<p><strong>表示当前对象</strong>：<code>self</code> 是一个特殊的变量，它总是指向当前的对象实例。通过 <code>self</code>，我们可以在类的方法中访问和修改这个对象自己的属性。</p>
+</li>
+<li>
+<p><strong>属性存储</strong>：当 <code>__init__</code> 函数中写 <code>self.client = ...</code> 时，我们就是在给这个对象添加一个名为 <code>client</code> 的属性，并把 MongoDB 连接信息存储在这里。以后，任何时候你都可以通过这个对象（比如 <code>manager.client</code>）访问这个属性。</p>
+</li>
+<li>
+<p><strong>保持一致性</strong>：<code>self</code> 确保你在对象的不同方法中都能访问到同样的数据。比如，<code>self.db</code> 是在 <code>__init__</code> 里创建的，你可以在类的其他方法中随时用 <code>self.db</code> 来进行数据库操作。</p>
+</li>
+</ul>
+<p><code>__init__</code> 和 <code>self</code> 就像是为一个新的物体（比如一个玩具车）装上了引擎、轮子和方向盘。<code>__init__</code> 是组装的过程，把所有零件（参数）放到位，而 <code>self</code> 是确保你在任何时候都能找到和使用这些零件。通过这种方式，你创建的每一个 <code>MongoManager</code> 对象都是独立的，且已经准备好可以使用。</p>
+<p>我目前用的是json存聊天记录，如果你喜欢别的类型随意。</p>
+<p>我们创建一个函数用来预先生成将要存在数据库里的json：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">generate_chat_json</span>(self, ai_reply, human_message, session_id, timestamp<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    生成一个包含聊天信息的 JSON 字符串。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    参数：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - ai_reply (str): AI 的回复信息。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - human_message (str): 人类的消息。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - session_id (str): 会话的唯一标识符。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - timestamp (datetime, optional): 消息的时间戳。如果未提供，则使用当前时间。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    返回：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - str: 包含聊天信息的 JSON 字符串。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果没有提供时间戳，则使用当前时间</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> timestamp <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>        timestamp <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将时间戳格式化为字符串，格式为 ISO 8601（不带秒）</span>
+</span></span><span style="display:flex;"><span>    timestamp_str <span style="color:#f92672">=</span> timestamp<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#34;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">T%H:%M&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建一个字典来存储聊天数据</span>
+</span></span><span style="display:flex;"><span>    chat_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;message_id&#39;</span>: str(uuid<span style="color:#f92672">.</span>uuid4()),  <span style="color:#75715e"># 生成一个唯一的消息ID</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;ai_reply&#39;</span>: ai_reply,             <span style="color:#75715e"># 存储AI的回复</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;human_message&#39;</span>: human_message,   <span style="color:#75715e"># 存储人类的消息</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;timestamp&#39;</span>: timestamp_str,       <span style="color:#75715e"># 存储格式化后的时间戳</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;session_id&#39;</span>: session_id          <span style="color:#75715e"># 存储会话ID</span>
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 将字典转化为 JSON 字符串并返回</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> json<span style="color:#f92672">.</span>dumps(chat_data, ensure_ascii<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, indent<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># ensure_ascii=False 确保非 ASCII 字符（如中文）能够正确显示</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># indent=4 使生成的 JSON 更加易读</span>
+</span></span></code></pre></div><p>接下来创建一个函数用于写入单次的对话记录到数据库：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">insert_chat</span>(self, collection_name, ai_reply, human_message, session_id, timestamp<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    将聊天记录插入到指定的 MongoDB 集合中。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    参数：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - collection_name (str): MongoDB 中集合的名称。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - ai_reply (str): AI 的回复信息。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - human_message (str): 人类的消息。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - session_id (str): 会话的唯一标识符。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - timestamp (datetime, optional): 消息的时间戳。如果未提供，则使用当前时间。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    返回：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - ObjectId: 插入的文档的唯一 ID。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 生成聊天记录的 JSON 数据</span>
+</span></span><span style="display:flex;"><span>    json_data <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>generate_chat_json(self, ai_reply, human_message, session_id, timestamp)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取指定名称的集合对象</span>
+</span></span><span style="display:flex;"><span>    collection <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>db[collection_name]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 确保 json_data 是字典类型，以便插入到 MongoDB</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> isinstance(json_data, str):
+</span></span><span style="display:flex;"><span>        json_data <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>loads(json_data)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 插入聊天记录到集合中，并返回插入的文档ID</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> collection<span style="color:#f92672">.</span>insert_one(json_data)<span style="color:#f92672">.</span>inserted_id
+</span></span></code></pre></div><p>我们还要添加一些用于简单查询的函数：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>    <span style="color:#75715e"># 获取某个时间段内的所有数据</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_mem_in_time_range</span>(self, collection_name, start_time, end_time):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        在指定的集合中获取某个时间段内的所有数据。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        参数：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - collection_name (str): 集合的名称。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - start_time (datetime): 起始时间。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - end_time (datetime): 结束时间。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        返回：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - list: 包含查询结果的列表。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        collection <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>db[collection_name]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 使用 find 查询符合条件的文档</span>
+</span></span><span style="display:flex;"><span>        cursor <span style="color:#f92672">=</span> collection<span style="color:#f92672">.</span>find({
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;timestamp&#39;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;$gte&#39;</span>: start_time<span style="color:#f92672">.</span>isoformat(),
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;$lte&#39;</span>: end_time<span style="color:#f92672">.</span>isoformat()
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将查询结果转换为列表并返回</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> list(cursor)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 根据 ID 获取数据</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_data_by_id</span>(self, collection_name, id):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        在指定的集合中根据文档 ID 获取数据。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        参数：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - collection_name (str): 集合的名称。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - id (ObjectId): 文档的唯一 ID。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        返回：
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        - dict or None: 查询到的文档数据，如果未找到则返回 None。
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>        collection <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>db[collection_name]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 使用 find_one 查询指定 ID 的文档</span>
+</span></span><span style="display:flex;"><span>        data <span style="color:#f92672">=</span> collection<span style="color:#f92672">.</span>find_one({<span style="color:#e6db74">&#39;_id&#39;</span>: id})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> data
+</span></span></code></pre></div><p>最后整体代码看起来是这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> uuid
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pymongo <span style="color:#f92672">import</span> MongoClient
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MongoManager</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> __init__(self, host<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;mongodb&#39;</span>, port<span style="color:#f92672">=</span><span style="color:#ae81ff">27017</span>, username<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;admin&#39;</span>, password<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;secret&#39;</span>, db_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;chat_history&#39;</span>):
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>client <span style="color:#f92672">=</span> MongoClient(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#39;mongodb://</span><span style="color:#e6db74">{</span>username<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>password<span style="color:#e6db74">}</span><span style="color:#e6db74">@</span><span style="color:#e6db74">{</span>host<span style="color:#e6db74">}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{</span>port<span style="color:#e6db74">}</span><span style="color:#e6db74">/&#39;</span>)
+</span></span><span style="display:flex;"><span>        self<span style="color:#f92672">.</span>db <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>client[db_name]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">generate_chat_json</span>(self, ai_reply, human_message, session_id, timestamp<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> timestamp <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>            timestamp <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>now()
+</span></span><span style="display:flex;"><span>        timestamp_str <span style="color:#f92672">=</span> timestamp<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#34;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">T%H:%M&#34;</span>)
+</span></span><span style="display:flex;"><span>        chat_data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;message_id&#39;</span>: str(uuid<span style="color:#f92672">.</span>uuid4()),
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;ai_reply&#39;</span>: ai_reply,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;human_message&#39;</span>: human_message,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;timestamp&#39;</span>: timestamp_str,
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;session_id&#39;</span>: session_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> json<span style="color:#f92672">.</span>dumps(chat_data, ensure_ascii<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>, indent<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">insert_chat</span>(self, collection_name, ai_reply, human_message, session_id, timestamp<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>        json_data <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>generate_chat_json(self, ai_reply, human_message, session_id, timestamp)
+</span></span><span style="display:flex;"><span>        collection <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>db[collection_name]
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> isinstance(json_data, str):
+</span></span><span style="display:flex;"><span>            json_data <span style="color:#f92672">=</span> json<span style="color:#f92672">.</span>loads(json_data)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> collection<span style="color:#f92672">.</span>insert_one(json_data)<span style="color:#f92672">.</span>inserted_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_mem_in_time_range</span>(self, collection_name, start_time, end_time):
+</span></span><span style="display:flex;"><span>        collection <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>db[collection_name]
+</span></span><span style="display:flex;"><span>        cursor <span style="color:#f92672">=</span> collection<span style="color:#f92672">.</span>find({
+</span></span><span style="display:flex;"><span>            <span style="color:#e6db74">&#39;timestamp&#39;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;$gte&#39;</span>: start_time<span style="color:#f92672">.</span>isoformat(),
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;$lte&#39;</span>: end_time<span style="color:#f92672">.</span>isoformat()
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> list(cursor)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_data_by_id</span>(self, collection_name, id):
+</span></span><span style="display:flex;"><span>        collection <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>db[collection_name]
+</span></span><span style="display:flex;"><span>        data <span style="color:#f92672">=</span> collection<span style="color:#f92672">.</span>find_one({<span style="color:#e6db74">&#39;_id&#39;</span>: id})
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> data
+</span></span></code></pre></div><p>好的，到目前为止，我们自定义模块就暂时告以段落了，下面我们将会在主函数里导入并使用它们。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> uuid
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 导入之前创建的 cyberaimodules 模块</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> cyberaimodules <span style="color:#f92672">import</span> cyberaimongo
+</span></span></code></pre></div><p>这里我们暂时使用的测试用的环境变量，实际生产环境建议保存好敏感数据，避免直接将授权信息放在代码里。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># 创建虚拟的环境变量暂时用来测试</span>
+</span></span><span style="display:flex;"><span>mongo_host <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_HOST&#39;</span>, <span style="color:#e6db74">&#39;localhost&#39;</span>)
+</span></span><span style="display:flex;"><span>mongo_port <span style="color:#f92672">=</span> int(os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_PORT&#39;</span>, <span style="color:#ae81ff">27017</span>))
+</span></span><span style="display:flex;"><span>mongo_user <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_USER&#39;</span>, <span style="color:#e6db74">&#39;admin&#39;</span>)
+</span></span><span style="display:flex;"><span>mongo_password <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_PASSWORD&#39;</span>, <span style="color:#e6db74">&#39;secret&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 数据库的名字叫做 chat_history</span>
+</span></span><span style="display:flex;"><span>mongo_db_name <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_DB_NAME&#39;</span>, <span style="color:#e6db74">&#39;chat_history&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化 MongoDB 客户端</span>
+</span></span><span style="display:flex;"><span>mongo_manager <span style="color:#f92672">=</span> cyberaimongo<span style="color:#f92672">.</span>MongoManager(
+</span></span><span style="display:flex;"><span>    host<span style="color:#f92672">=</span>mongo_host,
+</span></span><span style="display:flex;"><span>    port<span style="color:#f92672">=</span>mongo_port,
+</span></span><span style="display:flex;"><span>    username<span style="color:#f92672">=</span>mongo_user,
+</span></span><span style="display:flex;"><span>    password<span style="color:#f92672">=</span>mongo_password,
+</span></span><span style="display:flex;"><span>    db_name<span style="color:#f92672">=</span>mongo_db_name,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p>然后我们先简单测试一下对话过程中单次对话的数据库写入操作，更复杂的会话与总结功能请等待下一篇。</p>
+<p>我们在get_response_from_llm这个函数里增加一点内容来测试一下刚刚的模块有没有正常工作（请注意你的Mongo DB对本地端口开放）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>  <span style="color:#75715e"># 在llm回复后先尝试插入  本次聊天数据</span>
+</span></span><span style="display:flex;"><span>  chat_id <span style="color:#f92672">=</span> mongo_manager<span style="color:#f92672">.</span>insert_chat(
+</span></span><span style="display:flex;"><span>        collection_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;daily&#39;</span>,
+</span></span><span style="display:flex;"><span>        ai_reply<span style="color:#f92672">=</span>response_str,
+</span></span><span style="display:flex;"><span>        human_message<span style="color:#f92672">=</span>question,
+</span></span><span style="display:flex;"><span>    		<span style="color:#75715e"># 先暂时生成一个会话ID测试，我们后续会根据超时时间进行处理会话</span>
+</span></span><span style="display:flex;"><span>        session_id<span style="color:#f92672">=</span>str(uuid<span style="color:#f92672">.</span>uuid4()),
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e"># 然后再使用返回的唯一chat_id查询这条对话，看看能不能回溯</span>
+</span></span><span style="display:flex;"><span>    query <span style="color:#f92672">=</span> mongo_manager<span style="color:#f92672">.</span>get_data_by_id(
+</span></span><span style="display:flex;"><span>        collection_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;daily&#39;</span>,
+</span></span><span style="display:flex;"><span>        id<span style="color:#f92672">=</span>chat_id
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 如果有，打印出来康康：</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> query:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Chat data: </span><span style="color:#e6db74">{</span>query<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span></code></pre></div><p>完整的代码看起来是这样：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># main.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> uuid
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> openai <span style="color:#f92672">import</span> OpenAI
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 导入之前创建的 cyberaimodules 模块</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> cyberaimodules <span style="color:#f92672">import</span> cyberaimongo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mongo_host <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_HOST&#39;</span>, <span style="color:#e6db74">&#39;localhost&#39;</span>)
+</span></span><span style="display:flex;"><span>mongo_port <span style="color:#f92672">=</span> int(os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_PORT&#39;</span>, <span style="color:#ae81ff">27017</span>))
+</span></span><span style="display:flex;"><span>mongo_user <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_USER&#39;</span>, <span style="color:#e6db74">&#39;admin&#39;</span>)
+</span></span><span style="display:flex;"><span>mongo_password <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_PASSWORD&#39;</span>, <span style="color:#e6db74">&#39;secret&#39;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 数据库的名字叫做 chat_history</span>
+</span></span><span style="display:flex;"><span>mongo_db_name <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getenv(<span style="color:#e6db74">&#39;MONGO_DB_NAME&#39;</span>, <span style="color:#e6db74">&#39;chat_history&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化 MongoDB 客户端</span>
+</span></span><span style="display:flex;"><span>mongo_manager <span style="color:#f92672">=</span> cyberaimongo<span style="color:#f92672">.</span>MongoManager(
+</span></span><span style="display:flex;"><span>    host<span style="color:#f92672">=</span>mongo_host,
+</span></span><span style="display:flex;"><span>    port<span style="color:#f92672">=</span>mongo_port,
+</span></span><span style="display:flex;"><span>    username<span style="color:#f92672">=</span>mongo_user,
+</span></span><span style="display:flex;"><span>    password<span style="color:#f92672">=</span>mongo_password,
+</span></span><span style="display:flex;"><span>    db_name<span style="color:#f92672">=</span>mongo_db_name,
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 初始化 OpenAI 模型</span>
+</span></span><span style="display:flex;"><span>chat_model<span style="color:#f92672">=</span> OpenAI(
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 你需要把这个替换成你的后端的API地址</span>
+</span></span><span style="display:flex;"><span>	base_url<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://api.openai.com/v1/&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e"># 这是用于身份验证的 API Key</span>
+</span></span><span style="display:flex;"><span>	api_key <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;sk-SbmHyhKJHt3378h9dn1145141919810D1Fbcd12d&#34;</span>
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 聊天记录和总结记录的列表</span>
+</span></span><span style="display:flex;"><span>chat_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>summary_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>SUMMARY_THRESHOLD <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>  <span style="color:#75715e"># 定义达到多少轮次后进行总结</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">summarize_chat_history</span>(chat_history_window):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    对最近的聊天记录进行总结
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param chat_history_window: 最近的聊天记录
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: 总结后的字符串
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建总结提示</span>
+</span></span><span style="display:flex;"><span>    summary_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;请总结以下对话内容：</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;正在对以下内容生成总结: </span><span style="color:#e6db74">{</span>summary_prompt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用 LLM 生成总结</span>
+</span></span><span style="display:flex;"><span>    summary_response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o-mini&#39;</span>,
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>[{<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: summary_prompt}],
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取总结内容</span>
+</span></span><span style="display:flex;"><span>    summary_str <span style="color:#f92672">=</span> summary_response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> summary_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_from_llm</span>(question):
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    获取 LLM 的响应
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :param question: 用户的问题
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    :return: LLM 的响应
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">global</span> chat_history, summary_history
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果聊天记录达到总结阈值</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(chat_history) <span style="color:#f92672">&gt;=</span> SUMMARY_THRESHOLD:
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>        chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span>SUMMARY_THRESHOLD<span style="color:#f92672">*</span><span style="color:#ae81ff">2</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 生成总结</span>
+</span></span><span style="display:flex;"><span>        summary <span style="color:#f92672">=</span> summarize_chat_history(chat_history_window)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将总结添加到总结记录中</span>
+</span></span><span style="display:flex;"><span>        summary_history<span style="color:#f92672">.</span>append(summary)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 保留最后一条聊天记录</span>
+</span></span><span style="display:flex;"><span>        chat_history <span style="color:#f92672">=</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>:]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取最近的聊天记录窗口</span>
+</span></span><span style="display:flex;"><span>    chat_history_window <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join([<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>role<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">{</span>content<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#66d9ef">for</span> role, content <span style="color:#f92672">in</span> chat_history[<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span><span style="color:#f92672">*</span>SUMMARY_THRESHOLD:<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]])
+</span></span><span style="display:flex;"><span>    chat_history_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Here is the chat history:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{</span>chat_history_window<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 创建消息列表</span>
+</span></span><span style="display:flex;"><span>    message <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;system&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">&#34;You are a catgirl! Output in Chinese.&#34;</span>},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: chat_history_prompt},
+</span></span><span style="display:flex;"><span>        {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;user&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: question},
+</span></span><span style="display:flex;"><span>    ]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 如果有总结记录，将其添加到消息列表中</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> summary_history:
+</span></span><span style="display:flex;"><span>        summary_prompt <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join(summary_history)
+</span></span><span style="display:flex;"><span>        message<span style="color:#f92672">.</span>insert(<span style="color:#ae81ff">1</span>, {<span style="color:#e6db74">&#34;role&#34;</span>: <span style="color:#e6db74">&#34;assistant&#34;</span>, <span style="color:#e6db74">&#34;content&#34;</span>: <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Summary of previous conversations:</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">{</span>summary_prompt<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>})
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 调用 LLM 获取响应</span>
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> chat_model<span style="color:#f92672">.</span>chat<span style="color:#f92672">.</span>completions<span style="color:#f92672">.</span>create(
+</span></span><span style="display:flex;"><span>        model<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;gpt-4o&#39;</span>,
+</span></span><span style="display:flex;"><span>        messages<span style="color:#f92672">=</span>message,
+</span></span><span style="display:flex;"><span>        temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0.7</span>,
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;message: </span><span style="color:#e6db74">{</span>message<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># 获取响应内容</span>
+</span></span><span style="display:flex;"><span>    response_str <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>choices[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>message<span style="color:#f92672">.</span>content
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    chat_id <span style="color:#f92672">=</span> mongo_manager<span style="color:#f92672">.</span>insert_chat(
+</span></span><span style="display:flex;"><span>        collection_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;daily&#39;</span>,
+</span></span><span style="display:flex;"><span>        ai_reply<span style="color:#f92672">=</span>response_str,
+</span></span><span style="display:flex;"><span>        human_message<span style="color:#f92672">=</span>question,
+</span></span><span style="display:flex;"><span>        session_id<span style="color:#f92672">=</span>str(uuid<span style="color:#f92672">.</span>uuid4()),
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    query <span style="color:#f92672">=</span> mongo_manager<span style="color:#f92672">.</span>get_data_by_id(
+</span></span><span style="display:flex;"><span>        collection_name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;daily&#39;</span>,
+</span></span><span style="display:flex;"><span>        id<span style="color:#f92672">=</span>chat_id
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> query:
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;Chat data: </span><span style="color:#e6db74">{</span>query<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> response_str
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        user_input <span style="color:#f92672">=</span> input(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">输入问题或者请输入&#39;exit&#39;退出：&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> user_input<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;exit&#39;</span>:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;再见&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span> 
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将用户输入添加到聊天记录中</span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;human&#39;</span>, user_input))
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 获取 LLM 的响应</span>
+</span></span><span style="display:flex;"><span>        response <span style="color:#f92672">=</span> get_response_from_llm(user_input)
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 将 LLM 的响应添加到聊天记录中</span>
+</span></span><span style="display:flex;"><span>        chat_history<span style="color:#f92672">.</span>append((<span style="color:#e6db74">&#39;ai&#39;</span>, response))
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># 打印 LLM 的响应</span>
+</span></span><span style="display:flex;"><span>        print(response)
+</span></span></code></pre></div><p>到此，我们的记忆部分第一篇就大概结束了。下一篇我们将会在这个基础上，慢慢地把<strong>短期记忆</strong>和<strong>常态记忆</strong>加载聊完。大概就是，每一次LLM聊天的时候，会先记起昨天或者刚刚发生了什么事情，这样的话，我们的赛博老婆，就慢慢地拥有记忆了。祝你在赛博朋克的世界里玩得开心！</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://blog.licometa.me/">Cybermate!</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
