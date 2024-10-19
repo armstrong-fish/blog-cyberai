@@ -9,6 +9,7 @@ categories:
   - 教程
 tags:
   - 入门教程
+author: "Orion"
 license: GNU General Public License v3.0
 ---
 
