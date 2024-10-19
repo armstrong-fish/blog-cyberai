@@ -32,9 +32,9 @@ menu:
       name: Beginners
       url: /categories/beginners/
       weight: 30
-    - identifier: Qualifications
-      name: Qualifications
-      url: /categories/qualifications/
+    - identifier: Advanced
+      name: Advanced
+      url: /categories/advanced/
       weight: 40
     - identifier: About
       name: About

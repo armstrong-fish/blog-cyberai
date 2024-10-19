@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>All In One 小白大模型科普 | 自由AI阵线！</title>
+<meta name="keywords" content="入门教程">
+<meta name="description" content="帮助小白快速入门大模型相关概念和技术">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/aio-llm/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.fb30564bdf48fd945a3c243d95f03ea4824ee1df47dd13493a334179bfb5a0b1.css" integrity="sha256-&#43;zBWS99I/ZRaPCQ9lfA&#43;pIJO4d9H3RNJOjNBeb&#43;1oLE=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/aio-llm/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="自由AI阵线！ (Alt + H)">自由AI阵线！</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/archives/" title="Archive">
+                    <span>Archive</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/beginners/" title="Beginners">
+                    <span>Beginners</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/advanced/" title="Advanced">
+                    <span>Advanced</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      All In One 小白大模型科普
+    </h1>
+    <div class="post-description">
+      帮助小白快速入门大模型相关概念和技术
+    </div>
+    <div class="post-meta"><span title='2024-10-17 19:32:15 +0800 +0800'>October 17, 2024</span>&nbsp;·&nbsp;7 min
+
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e5%86%99%e5%9c%a8%e5%89%8d%e9%9d%a2" aria-label="写在前面">写在前面</a><ul>
+                        
+                <li>
+                    <a href="#%e4%b8%80%e9%94%ae%e5%8c%85" aria-label="一键包">一键包</a></li>
+                <li>
+                    <a href="#%e6%8f%90%e9%97%ae%e7%a4%bc%e4%bb%aa" aria-label="提问礼仪">提问礼仪</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e9%a2%84%e5%a4%87%e7%9f%a5%e8%af%86" aria-label="预备知识">预备知识</a><ul>
+                        
+                <li>
+                    <a href="#%e5%a4%a7%e6%a8%a1%e5%9e%8b%e7%9b%b8%e5%85%b3" aria-label="大模型相关">大模型相关</a></li>
+                <li>
+                    <a href="#%e8%ae%a1%e7%ae%97%e6%9c%ba%e5%b8%b8%e8%af%86" aria-label="计算机常识">计算机常识</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e7%83%ad%e8%ba%ab%e8%ae%ad%e7%bb%83" aria-label="热身训练">热身训练</a><ul>
+                        
+                <li>
+                    <a href="#%e5%ae%89%e8%a3%85%e6%98%be%e5%8d%a1%e9%a9%b1%e5%8a%a8" aria-label="安装显卡驱动">安装显卡驱动</a></li>
+                <li>
+                    <a href="#%e5%9c%a8%e7%bb%88%e7%ab%af%e5%91%bd%e4%bb%a4%e8%a1%8c%e4%b8%ad%e5%88%87%e6%8d%a2%e8%b7%af%e5%be%84" aria-label="在终端/命令行中切换路径">在终端/命令行中切换路径</a></li>
+                <li>
+                    <a href="#%e5%91%bd%e4%bb%a4%e8%a1%8c%e4%bb%a3%e7%90%86" aria-label="命令行代理">命令行代理</a></li>
+                <li>
+                    <a href="#%e4%bb%8e%e7%bd%91%e4%b8%8a%e5%85%8b%e9%9a%86%e4%bb%a3%e7%a0%81%e4%bb%93%e5%ba%93" aria-label="从网上克隆代码仓库">从网上克隆代码仓库</a></li>
+                <li>
+                    <a href="#%e4%bb%8e%e9%95%9c%e5%83%8f%e7%ab%99%e4%b8%8b%e8%bd%bd%e6%a8%a1%e5%9e%8b" aria-label="从镜像站下载模型">从镜像站下载模型</a></li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e6%bf%80%e6%b4%bb%e8%99%9a%e6%8b%9f%e7%8e%af%e5%a2%83" aria-label="创建/激活虚拟环境">创建/激活虚拟环境</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e8%ae%a4%e8%af%86%e9%87%8f%e5%8c%96" aria-label="认识量化">认识量化</a><ul>
+                        
+                <li>
+                    <a href="#gguf" aria-label="GGUF">GGUF</a></li>
+                <li>
+                    <a href="#exl2" aria-label="EXL2">EXL2</a></li>
+                <li>
+                    <a href="#gptq" aria-label="GPTQ">GPTQ</a></li>
+                <li>
+                    <a href="#awq" aria-label="AWQ">AWQ</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e5%8a%a0%e8%bd%bd%e6%a8%a1%e5%9e%8b" aria-label="加载模型">加载模型</a><ul>
+                        
+                <li>
+                    <a href="#koboldcpp" aria-label="koboldcpp">koboldcpp</a></li>
+                <li>
+                    <a href="#ollama" aria-label="ollama">ollama</a></li>
+                <li>
+                    <a href="#lmstudio" aria-label="LMStudio">LMStudio</a></li>
+                <li>
+                    <a href="#llamacpp" aria-label="llama.cpp">llama.cpp</a></li>
+                <li>
+                    <a href="#tabbyapi" aria-label="tabbyAPI">tabbyAPI</a></li>
+                <li>
+                    <a href="#vllm" aria-label="vllm">vllm</a></li>
+                <li>
+                    <a href="#aphrodite-engine" aria-label="Aphrodite engine">Aphrodite engine</a></li>
+                <li>
+                    <a href="#webui" aria-label="webui">webui</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e5%b8%b8%e8%a7%81%e9%97%ae%e9%a2%98%e9%80%9f%e6%9f%a5" aria-label="常见问题速查">常见问题速查</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><blockquote>
+<p>本文转载自<a href="https://github.com/Orion-zhen/Orion-zhen.github.io">Orion的个人博客</a>, 使用 GPL 3.0协议.</p>
+</blockquote>
+<p>这里有一个相关的系统架构图供参考:</p>
+<p><img loading="lazy" src="/Aio-llm/aio-llm-sysarch.png" alt="系统架构图"  />
+</p>
+<p>另附有常见问题速查, 见本文<strong>最末尾</strong>, 如果你是新手, 建议详细阅读本文后再看</p>
+<h2 id="写在前面">写在前面<a hidden class="anchor" aria-hidden="true" href="#写在前面">#</a></h2>
+<p>首先需要声明的是, 自己动手玩大模型是有<strong>技术门槛</strong>的, 是需要你动一点脑子去学习的. 如果你不愿意动脑子, 只想衣来伸手饭来张口, 或者遇到一点问题就一股脑地问人, 又或者你连阅读一篇简体中文编写的新手入门教程的耐心都没有, 那么我不建议你尝试自己部署大模型. 你可以使用别的公司包装好的大模型应用, 这样一站式的解决方案非常方便, 但代价就是可玩性远远不如自己动手, 并且有诸多限制</p>
+<p>这是一篇面向小白的科普入门教程, 用于快速给小白讲述玩大模型需要掌握的一些基础知识. 阅读这篇教程, 你会:</p>
+<ul>
+<li>了解遇到问题时应该如何处理, 如何有效的寻求帮助</li>
+<li>了解大模型和一些计算机相关的常识</li>
+<li>了解不同的操作系统的特点, 以及如何选择</li>
+<li>了解一些基础的电脑操作</li>
+<li>了解不同的量化模型, 以及如何选择</li>
+<li>了解不同的模型加载器, 以及如何选择</li>
+</ul>
+<p>但是, 这篇教程不会讨论:</p>
+<ul>
+<li>如何设置 SillyTavern</li>
+<li>如何给模型破限/破甲</li>
+<li>如何设计采样器参数</li>
+<li>如何设置优化 prompt 模板</li>
+<li>如何选择你想要的模型</li>
+<li>如何寻找角色卡并导入到 st 中</li>
+<li>如何微调模型</li>
+</ul>
+<p>是萌新没关系, 人非生而知之者, 所有人都是从小白开始的. 重要的是你有一颗谦虚的心, 愿意积极地学习新事物, 愿意主动地搜索来解决自己的问题; 而不是当一个&quot;爷新&quot;</p>
+<h3 id="一键包">一键包<a hidden class="anchor" aria-hidden="true" href="#一键包">#</a></h3>
+<p>请立刻删除你电脑中的任何一键包, 哪怕这是群主的视频里分享的. 因为一键包不仅老旧, 更新不积极, 而且其中的各个组件互相耦合, 难以更新升级. 且使用一键包会让你丧失自己部署大模型的能力, 逐渐成为没有一键包就不会玩大模型的笨蛋</p>
+<h3 id="提问礼仪">提问礼仪<a hidden class="anchor" aria-hidden="true" href="#提问礼仪">#</a></h3>
+<ol>
+<li>当你遇到问题时, 请优先上网搜索. 一般地, 你可以复制一小段关键的报错信息, 然后粘贴到<strong>Google</strong>搜索中进行搜索. 注意, 请务必使用<strong>Google</strong>, 百度或必应只会给你推送广告和垃圾信息</li>
+<li>你还可以在群里搜索关键字, 也可以找到前人问过的和你相关的问题</li>
+<li>当且仅当以上两条你都尝试过且无法解决你的问题时, 你可以在相关论坛中发送求助请求, 但请注意遵守论坛的相关规则</li>
+</ol>
+<p>当你在论坛中求助时, 请确保你的消息中包含如下要点:</p>
+<ul>
+<li>系统信息: 你在用什么系统? Arch Linux? Windows11? Windows10?</li>
+<li>环境信息: 你用的是什么加载器? koboldcpp? webui? tabby? vllm? 还是其他的东西?</li>
+<li>模型信息: 你用的是什么模型? 请把模型名和量化方式一并给出, 例如 Qwen2.5-32B-Instruct-Q5_K_M, Mistral-Nemo-Instruct-4.65bpw-exl2 等</li>
+<li>模型信息补充: 如果你的问题是关于模型生成的文字方面的, 那么你还应该提供你使用的 prompt 设置, 采样器设置等信息</li>
+<li>你做了什么: 你是如何一步一步遭遇这个问题的?</li>
+<li>简要描述: 简要描述你遇到了什么问题</li>
+<li>报错信息: 最好是在<strong>命令行</strong>中复制报错信息, 然后粘贴到你的帖子里发送出来. 如果你不会, 那么就使用屏幕截图, 但一定要把终端信息<strong>截全</strong></li>
+</ul>
+<blockquote>
+<p>对于 Windows 下, 点击某个可执行文件而没有任何命令行输出的情况, 请在那个文件所在的目录下打开命令行, 然后在命令行中输入 <code>./那个可执行文件名.exe</code> 并运行, 从而观察是否有信息输出
+注意, 请将上文中的&quot;那个可执行文件名&quot;替换成你实际的文件名, 不要直接复制命令运行</p>
+</blockquote>
+<p>直接丢一张没头没尾的截图, 然后问&quot;大佬们能不能帮我看看这是什么问题啊&quot;, 是不礼貌的提问行为. 不是所有人都愿意和你玩猜谜游戏. 关于如何提问, 请参考这个GitHub项目: <a href="https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md">提问的智慧</a></p>
+<h2 id="预备知识">预备知识<a hidden class="anchor" aria-hidden="true" href="#预备知识">#</a></h2>
+<h3 id="大模型相关">大模型相关<a hidden class="anchor" aria-hidden="true" href="#大模型相关">#</a></h3>
+<ul>
+<li><strong>llm, 模型, ai</strong>: 一种神奇的东西, 你给它发送文字, 它能相应地生成出一些文字给你</li>
+<li><strong>加载器, 后端, loader, backend</strong>: 能够加载模型, 并且提供<strong>API</strong>供别人或者别的<strong>前端</strong>使用的东西. 你可以把模型想象成货物, 加载器就是装货物的车</li>
+<li><strong>API</strong>: 加载器提供的一种标准接口，就像接头的暗号一样，是前后端之间相互联系的一种方式. 有了这个东西, 你, 或者<strong>前端</strong>就不用管加载器里面是怎么运行的, 只要按照<strong>API</strong>提供的使用方式使用就行了</li>
+<li><strong>并发</strong>: 指的是多个事情, 在同一时间段内同时发生了. 这里特指加载器在同一时间收到多个AI生成文字的请求</li>
+<li><strong>前端, frontend</strong>: 在<strong>后端</strong>的支持下, 能玩各种花活的东西, 例如后文要讲述的**SillyTavern(酒馆)**就是一个典型的前端，前端可以简化交互, 优化体验</li>
+<li><strong>量化</strong>: 原本形态的大模型太大了, 以至于你有限的显存难以容纳下去. <strong>量化</strong>是这样一种手段, 可以大幅减小模型的体积, 显著加快模型运行速度, 并且稍微降低模型的性能表现. 换言之, 你有限的显存空间可以放下更大的模型的量化版本了</li>
+<li><strong>甲, 审核, 对齐, 道德对齐</strong>: 和b站的审核差不多, 模型厂们都会千方百计地给自己的模型加上一些限制</li>
+<li><strong>提示词, prompt</strong>: 简而言之, 就是给模型输入的文字. 模型会根据你的提示词生成一些文字. 通过精心设计提示词, 可以让模型生成出一些你想要的东西. 想进一步了解可以参考: <a href="https://www.promptingguide.ai">Prompt Engineering Guide</a></li>
+<li><strong>采样器</strong>: 采样器是模型运行的关键环节, 它决定了模型的输出结果. 采样器的设置可以影响模型的输出结果, 因此, 你需要对采样器进行优化, 才能让模型生成出更符合你的要求的文字</li>
+<li><strong>破甲, 破限</strong>: 顾名思义, 即通过精心设计提示词等方式, 破除模型厂给模型的各种限制, 从而可以做一些本来不能做的事情</li>
+<li><strong>hf, HF</strong>: <a href="https://huggingface.co/">huggingface</a>网站的简称, 你可以在这个上面浏览和下载各种不同的模型</li>
+</ul>
+<h3 id="计算机常识">计算机常识<a hidden class="anchor" aria-hidden="true" href="#计算机常识">#</a></h3>
+<ul>
+<li><strong>Git</strong>: 代码管理工具, 你可以用这个在<strong>GitHub</strong>上下载很多好玩的代码仓库到你的本地, 然后运行起来. 后文要讲述的很多<strong>后端</strong>和<strong>前端</strong>, 例如<strong>llama.cpp</strong>, <strong>tabbyAPI</strong>, <strong>SillyTavern</strong>等, 都需要(推荐使用)用到<strong>Git</strong>来下载</li>
+<li><strong>GitHub</strong>：是一个开发者平台，允许开发者创建、存储、管理和分享他们的代码. 你可以在这里找到很多优秀的项目并使用<strong>git</strong>命令下载或克隆(clone)到你的计算机并运行</li>
+<li><strong>克隆, clone</strong>: <strong>Git</strong>提供的一个<strong>命令</strong>, 通过这个命令你可以将<strong>GitHub</strong>上的仓库下载到本地</li>
+<li><strong>命令, 运行</strong>: 在本文中, <strong>命令</strong>这个词 <em>尤指</em> 你打开<strong>命令行界面</strong>, 例如Windows下的<strong>powershell</strong>或者<strong>CMD</strong>, Linux或MacOS下的<strong>终端</strong>, 然后输入一些<strong>命令</strong>来运行. 注意, 本教程中所有的<strong>命令</strong>或者<strong>运行</strong>都是在<strong>命令行</strong>中进行操作, 而不是让你点击鼠标运行一些东西</li>
+<li><strong>虚拟环境</strong>: 很多时候, 不同的代码仓库需要不同的<strong>Python模块</strong>, 而这些模块之间很可能会起冲突. 这时候就需要<strong>虚拟环境</strong>派上用场了. 有了虚拟环境, 只需要将不同的代码仓库放到不同的虚拟环境中, 当使用某个仓库时就激活这个虚拟环境, 妈妈再也不用担心依赖打架了</li>
+<li><strong>路径, 目录</strong>: 是你存放下载下来的模型仓库的地方. 你必须先进入到相应的<strong>目录</strong>, 才能运行仓库中的代码, 或者是激活<strong>虚拟环境</strong>, 或者是安装<strong>Python模块</strong>. 就好比你把一包纸放在厕所里, 那你就必须进入厕所才能拿到这包纸, 你不能在厨房里拿到这包纸. 有的时候需要注意<strong>区分</strong>相对路径和绝对路径</li>
+</ul>
+<h2 id="热身训练">热身训练<a hidden class="anchor" aria-hidden="true" href="#热身训练">#</a></h2>
+<h3 id="安装显卡驱动">安装显卡驱动<a hidden class="anchor" aria-hidden="true" href="#安装显卡驱动">#</a></h3>
+<p>想要使用你的独立显卡, 安装驱动是必不可少的. 如果你和我一样使用 <strong>Arch Linux</strong>, 那么仅需一行<strong>命令</strong>即可安装驱动:</p>
+<ul>
+<li>N卡用户: <code>sudo pacman -S cuda nvidia</code></li>
+<li>A卡用户: <code>sudo pacman -S rocm-hip-sdk rocm-hip-runtime rocm-hip-libraries rocm-smi-lib</code></li>
+</ul>
+<p>如果你使用 Windows, 那么你就只能先找到官网, 然后下载对应的驱动, 最后进行安装. 请查找您的显卡品牌并善用Google找到官方网站并查阅最新的官方文档一步一步跟随安装教程……</p>
+<blockquote>
+<p>很麻烦, 不是吗</p>
+</blockquote>
+<p>在安装完驱动后, 请务必<strong>重启电脑</strong>, 以使驱动生效</p>
+<h3 id="在终端命令行中切换路径">在终端/命令行中切换路径<a hidden class="anchor" aria-hidden="true" href="#在终端命令行中切换路径">#</a></h3>
+<p>想要在终端中切换路径, 只需要使用 <code>cd</code> <strong>命令</strong>即可. 格式是:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd 你要去的路径
+</span></span></code></pre></div><p>例如切换到 <code>D:/models/tabbyAPI</code> 就只需要在命令行中输入:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>cd D:/models/tabbyAPI
+</span></span></code></pre></div><p>注意, 在你运行仓库中的任何代码前, 请<strong>务必</strong>检查你是否在正确的目录下. 例如, 不要在 <code>C:/Windows/System32</code> 下运行本来应该在 <code>D:/tabbyAPI</code> 目录下的代码</p>
+<h3 id="命令行代理">命令行代理<a hidden class="anchor" aria-hidden="true" href="#命令行代理">#</a></h3>
+<p>你可以在浏览器中通过梯子访问外网, 但如果不经过配置, 你无法在命令行中通过梯子访问外网. 在 Windows 下, 不同的梯子提供的命令行访问方式不同, 你可以翻看你的梯子的使用说明, 或者询问你的梯子的客服. Linux 下, 只需要设置环境变量就好了</p>
+<p>如果你没有命令行代理, 可能会出现安装st时没有动静的情况</p>
+<h3 id="从网上克隆代码仓库">从网上克隆代码仓库<a hidden class="anchor" aria-hidden="true" href="#从网上克隆代码仓库">#</a></h3>
+<blockquote>
+<p>请确保你可以使用命令行代理, 因为GitHub需要梯子</p>
+</blockquote>
+<p>使用 <strong>Git</strong> 可以将网上的代码仓库下载到本地你指定的<strong>路径</strong>下. 格式是:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone 网上仓库的链接 <span style="color:#f92672">(</span>可选<span style="color:#f92672">)</span>本地文件夹名
+</span></span></code></pre></div><p>注意, 在<strong>运行克隆命令</strong>前, 请确保你切换到了你想要的<strong>路径</strong>. 你可以在命令行中切换, 也可以在文件资源管理器中打开对应的路径, 然后在右键菜单中选择&quot;在此处打开终端&quot;</p>
+<p>例如从Github上下载SillyTavern的代码仓库, 你可以<strong>运行</strong>以下<strong>命令</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone https://github.com/SillyTavern/SillyTavern.git
+</span></span></code></pre></div><p>等待<strong>命令</strong>执行完成, 然后你会在当前文件夹下看到一个名为<code>SillyTavern</code>的文件夹. 恭喜你, 成功地从网上将一个代码仓库下载到了本地</p>
+<h3 id="从镜像站下载模型">从镜像站下载模型<a hidden class="anchor" aria-hidden="true" href="#从镜像站下载模型">#</a></h3>
+<p>如果你的梯子是有流量限制的, 那么直接从hf本站上下载模型可能会让你的流量捉襟见肘. 一个有效的解决方案是从<a href="https://hf-mirror.com/">hf-mirror</a>上下载模型. 如何使用hf-mirror, 它的官网上已经给出了教程, 跟着它的做就是了. 我推荐的是它的<strong>方法二: huggingface-cli</strong></p>
+<p>如果你想在 Arch Linux 中安装 <code>huggingface-cli</code>, 你可以使用如下命令:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>sudo pacman -S python-huggingface-hub
+</span></span></code></pre></div><p>这会在全局下安装 <code>huggingface-cli</code>. Linux <strong>强烈不推荐</strong>在全局环境中使用 <code>pip</code> 安装任何依赖, 因为这很可能会污染你的环境, 把它变得一团糟. 想要使用 <code>pip</code>, 你应该先创建一个虚拟环境</p>
+<p>在 Windows 下就没有这个限制, 你可以在全局环境中使用 <code>pip</code>. Windows 混乱的环境管理由此可见一斑</p>
+<h3 id="创建激活虚拟环境">创建/激活虚拟环境<a hidden class="anchor" aria-hidden="true" href="#创建激活虚拟环境">#</a></h3>
+<p>无论是 Linux 还是 Windows, 都可以使用 Python 内置的 <code>venv</code> 模块轻松地创建虚拟环境. 格式是:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>python -m venv 你想要的虚拟环境名
+</span></span></code></pre></div><p>这会在你当前文件夹下生成一个 <code>你想要的虚拟环境名</code> 的文件夹, 这个文件夹中就是你刚刚创建的虚拟环境. 一个常见的虚拟环境名是 <code>.venv</code></p>
+<blockquote>
+<p>记得把&quot;你想要的虚拟环境名&quot;替换成真正的环境名, 比如 <code>.venv</code>, <code>venv</code> 之类的, 不要复制了我的示例<strong>命令</strong>就直接粘贴到<strong>命令行</strong>里去了</p>
+</blockquote>
+<p>想要激活这个虚拟环境, 在 Linux 下, 你需要<strong>运行</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>source 你想要的虚拟环境名/bin/activate
+</span></span></code></pre></div><p>在 Windows 下, 你则需要在<strong>终端</strong>中<strong>运行</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>你想要的虚拟环境名/Scripts/Activate.ps1
+</span></span></code></pre></div><p>如果你是使用<strong>CMD</strong>, 则<strong>运行</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>你想要的虚拟环境名/Scripts/activate.bat
+</span></span></code></pre></div><p><strong>注意</strong>: 在你激活虚拟环境前, 请<strong>务必</strong>确保你当前所在的<strong>目录</strong>下有这个虚拟环境文件夹!</p>
+<blockquote>
+<p>连一个操作都要整出两种不同的命令出来, Windows 真的混乱不堪</p>
+</blockquote>
+<p>想要退出虚拟环境, 只需要输入以下<strong>命令</strong>(通用):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>deactivate
+</span></span></code></pre></div><blockquote>
+<p>如果你喜欢让软件在电脑里拉史, 那么你也可以使用 <code>anaconda</code> 或 <code>miniconda</code> 来创建和管理虚拟环境</p>
+</blockquote>
+<h2 id="认识量化">认识量化<a hidden class="anchor" aria-hidden="true" href="#认识量化">#</a></h2>
+<p>目前主流的量化方式有以下几种:</p>
+<ul>
+<li>GGUF</li>
+<li>EXL2</li>
+<li>GPTQ</li>
+<li>AWQ</li>
+</ul>
+<p>量化是有不少优点的，例如降低硬件性能要求等……量化通常会降低参数的精度，量化的等级越高，参数的<strong>位</strong>越少，但一旦量化超过某个<strong>阈值</strong>， 这个<strong>阈值</strong>就像一个<strong>生死线</strong>，量化超过这个<strong>生死线</strong>，模型的能力会有非常严重的损失, 换言之, 变成智障.</p>
+<p>一般地, 模型量化的生死线是 4 位量化, 对 GGUF, 是 <code>Q4</code>; 对 EXL2, 是 <code>4bpw</code>; 对 GPTQ, 是 <code>INT4</code>; 对 AWQ, AWQ 默认就是4位量化</p>
+<p>在不同大小的模型的不同等级的量化之间比较的话, 优先选择大模型的低量化, 然后才选择小模型的高量化. 因为越大的模型越禁得起量化, 一般而言, 72B 4.65bpw 的性能是高于 32B 6.5bpw的</p>
+<p>想要快速估计模型的占用, 你可以在hf上找到模型, 计算模型文件本体的总大小, 再加上大约2G的上下文空间. 讲这个大小和你的可用内存/显存进行比较, 就可以大致估计你能否成功加载这个模型</p>
+<h3 id="gguf">GGUF<a hidden class="anchor" aria-hidden="true" href="#gguf">#</a></h3>
+<p>当你满足以下<strong>任一条件</strong>时, 推荐你使用 GGUF 量化:</p>
+<ul>
+<li>你是小白</li>
+<li>你在使用 Windows, 且没有使用 WSL</li>
+<li>你的显卡显存有限(例如只有8G), 但是内存相对宽裕(例如16G甚至32G)</li>
+<li>你能忍受一秒钟蹦一个字的慢速(甚至可能更慢)</li>
+</ul>
+<p>GGUF 量化可能是目前使用最广泛的量化, 从hf上浩如烟海的 GGUF 模型就能看出. GGUF 量化注重兼容性, 你可以使用显卡推理它(模型文件会加载进显存), 也可以使用CPU推理它(模型文件会加载进内存), 还可以同时使用显卡和CPU推理它</p>
+<p>但是, 需要注意的是, 你在选择模型时, 要考虑模型文件的大小和你的内存大小和你的显存大小, 具体如下:</p>
+<ul>
+<li>你能够把全部的模型都加载到显存中: 那么选择低于你显存容量的最大的模型就好了</li>
+<li>你需要同时使用内存和显存来加载模型: 那么选择<strong>低于你内存容量</strong>的模型, 并且<strong>预留一些内存空间</strong>给你的系统. 给 Windows 系统预留的空间会更多, 谁让 Windows 这么臃肿呢</li>
+</ul>
+<p>纠正一个误区: 当你同时使用内存和显存来加载模型时, 加载过程是先将模型<strong>全部</strong>加载到内存中, 然后再将一部分模型移动到显存中. 换言之, 你能加载多大的模型<strong>完全取决于</strong>你的内存大小, 而不是你的显存大小. 所以, 你需要根据你的内存大小来选择模型的大小, 而不是根据你的显存大小来选择模型的大小</p>
+<p><strong>层数</strong>: 模型是像千层饼一样分很多层的, 我们说同时使用内存和显存来加载模型时, 其实就是把模型的一些层复制到显存中, 让显卡来计算它们. 那么如何快速地估计你的显卡大约能容纳多少层, 从而减少试错次数呢?</p>
+<p>你可以计算显存大小占模型总大小的比例, 来快速地估计应该放多少层到显存中, 具体公式如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>放到显存中的层数 <span style="color:#f92672">=</span> 模型总层数 * 显存大小 / 模型总大小
+</span></span></code></pre></div><p>例如对一个80层, 总大小为40G的模型, 你想把它负载到一张显存大小为8G的显卡上, 那么你可以根据公式算出, 你的显卡大约能容纳 <code>80 * 8 / 40 = 16</code> 层, 你可以从16层开始尝试加载, 如果还是报错, 那就再慢慢降低层数直到成功加载</p>
+<p>一般 GGUF 量化的模型在模型名中都包含 <strong>GGUF</strong> 关键字, 模型文件也是以 <code>.gguf</code>结尾. 一个典型的 GGUF 量化模型文件名长这样: <code>qwen2.5-coder-7b-instruct-q4_k_m-00001-of-00002.gguf</code></p>
+<p>相信细心的你已经注意到了, 这个模型是从 <code>qwen2.5-coder-7b-instruct</code> 这个原始模型量化来的, 下面我们来解析后面的参数的含义:</p>
+<ul>
+<li><code>q4_k_m</code> 表明了量化的精度, 是 <code>Q4</code> 级别的量化, 数字越大, 量化等级越高, 模型大小越大, 模型性能损失越少, 反之亦然</li>
+<li><code>K</code> 是量化策略, 不用管它; <code>M</code> 代表在同级别下的量化尺寸, 是 <code>Medium</code> (中等), 相应地还有 <code>S</code>, 代表 <code>Small</code> (小的)</li>
+<li><code>00001-of-00002</code> 不是每个 GGUF 模型文件都含有这个部分. 这代表这的意思是这个模型被分成了两块, 这是第一块. 一般地, 你需要把模型的所有分块下载下来, 放在同一个<strong>目录</strong>下, 后面从加载器中加载模型时, 只要选中第一块模型即可</li>
+<li><code>.gguf</code> 后缀表明了这是一个 GGUF 量化模型</li>
+</ul>
+<h3 id="exl2">EXL2<a hidden class="anchor" aria-hidden="true" href="#exl2">#</a></h3>
+<p>当且仅当你满足以下<strong>所有条件</strong>时, 推荐你使用 EXL2 量化:</p>
+<ul>
+<li>你不是小白</li>
+<li>你显存充裕(至少16G以上)</li>
+<li>你想要模型对你的文字做出快速响应</li>
+</ul>
+<p>EXL2 量化是一种比较新的量化, 它能做到极限榨取模型的量化潜力, 提供面对单个请求时最快速的性能体验. 你仅能在显卡上加载 EXL2 模型, 你的模型容纳能力上限<strong>仅取决于</strong>你的显存大小</p>
+<p>一般的 EXL2 量化的模型所有的模型文件应该存放在一个<strong>文件夹</strong>中. 一个hf上典型的 EXL2 量化模型的模型名长这样: <code>Orion-zhen/Qwen2.5-32B-Instruct-6.5bpw-exl2</code></p>
+<p>相信细心的你已经注意到了, 这个模型是 <code>Orion-zhen</code> 从 <code>Qwen-2.5-32B-Instruct</code> 原始模型量化来的, 下面我们来解析后面的参数的含义:</p>
+<ul>
+<li><code>6.5bpw</code> 表明来量化的精度, 对应于 GGUF 的 <code>Q</code>几. 数字越大, 量化等级越高, 模型大小越大, 模型性能损失越少, 反之亦然</li>
+<li><code>exl2</code> 后缀表明来这是一个 EXL2 量化模型</li>
+</ul>
+<h3 id="gptq">GPTQ<a hidden class="anchor" aria-hidden="true" href="#gptq">#</a></h3>
+<p>当且仅当你满足以下<strong>所有条件</strong>时, 推荐你使用 GPTQ 量化:</p>
+<ul>
+<li>你不是小白</li>
+<li>你有<strong>并发</strong>需求</li>
+<li>你不想要 4 位的量化</li>
+</ul>
+<p>GPTQ 是一种比较老的量化了, 作者更新也不怎么积极. 你仅能在显卡上加载 GPTQ 模型, 你的模型容纳能力上限<strong>仅取决于</strong>你的显存大小</p>
+<p>一般的 GPTQ 量化的模型所有的模型文件应该存放在一个文件夹中. 一个hf上典型的 GPTQ 量化模型的模型名长这样: <code>Qwen/Qwen2.5-32B-Instruct-GPTQ-Int8</code></p>
+<p>和前文类似地, 你可以注意到, 这个模型是 <code>Qwen</code> 从 <code>Qwen-2.5-32B-Instruct</code> 原始模型量化来的, 下面我们来解析后面的参数的含义:</p>
+<ul>
+<li><code>GPTQ</code> 表明采用的量化方式是 GPTQ</li>
+<li><code>Int8</code> 表明这是 8 位的量化等级, 相应地还有 <code>Int4</code>, 表明是 4 位的量化等级</li>
+</ul>
+<h3 id="awq">AWQ<a hidden class="anchor" aria-hidden="true" href="#awq">#</a></h3>
+<p>当且仅当你满足以下<strong>所有条件</strong>时, 推荐你使用 AWQ 量化:</p>
+<ul>
+<li>你不是小白</li>
+<li>你有<strong>高并发</strong>需求</li>
+<li>你能接受 4 位量化</li>
+</ul>
+<p>AWQ 量化是对 GPTQ 的优化, 在同样的量化精度下 AWQ 的模型性能更高, 多并发时的吞吐量更大, 但是应对单个请求时速度慢于 GPTQ. 你仅能在显卡上加载 AWQ 模型, 你的模型容纳能力上限<strong>仅取决于</strong>你的显存大小</p>
+<p>一般的 AWQ 量化的模型所有的模型文件应该存放在一个文件夹中. 一个hf上典型的 AWQ 量化模型的模型名长这样: <code>Qwen/Qwen2.5-32B-Instruct-AWQ</code></p>
+<p>和前文类似地, 你可以注意到, 这个模型是 <code>Qwen</code> 从 <code>Qwen-2.5-32B-Instruct</code> 原始模型量化来的, 下面我们来解析后面的参数的含义:</p>
+<ul>
+<li><code>AWQ</code> 表明采用的量化方式是 AWQ</li>
+<li>诶, 怎么没有量化等级啊? 因为 AWQ 只提供 4 位的量化等级</li>
+</ul>
+<h2 id="加载模型">加载模型<a hidden class="anchor" aria-hidden="true" href="#加载模型">#</a></h2>
+<p><strong>注意</strong>: 所有的加载器对应一些兼容的量化方式. 不要强行让一个加载器加载它不支持的量化方式, 更不要把这样做后得到的报错信息拿到群里来问</p>
+<p>目前主流的, 我用过的加载器按照支持的量化方式划分如下:</p>
+<p><strong>仅</strong>支持 GGUF 量化的:</p>
+<ul>
+<li><a href="https://github.com/LostRuins/koboldcpp">koboldcpp</a></li>
+<li><a href="https://ollama.com/">ollama</a></li>
+<li><a href="https://lmstudio.ai/">LMStudio</a></li>
+<li><a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a></li>
+</ul>
+<p><strong>仅</strong>支持 EXL2 量化的:</p>
+<ul>
+<li><a href="https://github.com/theroyallab/tabbyAPI">tabbyAPI</a></li>
+<li><a href="https://github.com/turboderp/exui">ExUI</a> (我没用过)</li>
+</ul>
+<p>支持<strong>多种</strong>量化的:</p>
+<ul>
+<li><a href="https://github.com/vllm-project/vllm">vllm</a>: GPTQ, AWQ, BitsAndBytes, 等</li>
+<li><a href="https://github.com/PygmalionAI/aphrodite-engine">Aphrodite engine</a>: 同vllm</li>
+<li><a href="https://github.com/oobabooga/text-generation-webui">text-generation-webui</a>: GGUF, EXL2, 原始模型, GPTQ, AWQ, BitsAndBytes, 等</li>
+</ul>
+<p>接下来让我们逐个检查这些加载器的使用方法</p>
+<h3 id="koboldcpp">koboldcpp<a hidden class="anchor" aria-hidden="true" href="#koboldcpp">#</a></h3>
+<p>别称: kbd, kbdcpp, 狗头人</p>
+<p>当你满足以下<strong>任一条件</strong>时, 推荐使用 koboldcpp:</p>
+<ul>
+<li>你是小白</li>
+<li>你在用 Windows, 且不想用 WSL</li>
+<li>你不会/不想打开<strong>命令行</strong>输入哪怕一条<strong>命令</strong>, 只想用鼠标点击完成操作</li>
+</ul>
+<blockquote>
+<p>如果koboldcpp较为复杂的配置界面让你有些无所适从, 不妨尝试<a href="https://discord.com/channels/1124998756715216976/1287390599804227584/1287391701438300210">LMStudio</a></p>
+</blockquote>
+<p>首先前往<a href="https://github.com/LostRuins/koboldcpp/releases">koboldcpp发布页面</a>, 找到最新的版本, 然后按照如下条件选择你要下载的版本:</p>
+<ul>
+<li>Windows, 没有独立显卡: 下载 <code>koboldcpp_nocuda.exe</code></li>
+<li>Windows, 有 NVIDIA 显卡, cuda 版本是 12.0 以上: 下载 <code>koboldcpp_cu12.exe</code></li>
+<li>Windows, 有 NVIDIA 显卡, 不知道自己的 cuda 版本: 下载 <code>koboldcpp.exe</code></li>
+<li>Windows, 有 AMD 显卡: 前往<a href="https://github.com/YellowRoseCx/koboldcpp-rocm/releases">koboldcpp-rocm发布页面</a>, 下载 <code>koboldcpp_rocm.exe</code></li>
+</ul>
+<p>当你完成下载后, 双击打开对应的<code>.exe</code>文件. 如果有杀毒软件阻止你运行, 选择仍要运行. 在等待一段时间后, 你应该能看到 koboldcpp 的窗口和一个命令行窗口</p>
+<p>此时 koboldcpp 窗口应该处在 <strong>Quick Launch</strong> 界面, 你在这个界面中进行配置即可方便地加载 GGUF 模型. 让我们一项一项来看:</p>
+<ul>
+<li>Presets: 选择一套预设的加载方案. 如果你有 NVIDIA 显卡, 则在这个下拉式菜单中选择 <strong>Use CuBLAS</strong>; 如果你有 AMD 显卡, 则选择 <strong>Use rocBLAS</strong>; 如果你没有显卡, 则选择 <strong>Use CPU</strong></li>
+<li>GPU ID: 当你选择使用显卡加载时, 会出现这个选项. 选择你要使用的显卡的 ID (如1, 2, 3, 4, All). All 表示使用所有显卡. 当你正确地选择了显卡序号时, 旁边会有黄色的字表明你选择的显卡的型号</li>
+<li>GPU Layers: 当你使用显卡加载时, 会出现这个选项. 选择你要放到显卡中的模型层数. 模型层数的含义和计算参考上文 认识量化-&gt;GGUF 中的相关知识</li>
+<li>Use FlashAttention: 勾选这个选项时, 将启用 FlashAttention 功能, 它能提高模型的运行速度</li>
+<li>Disable MMAP: 是否将模型完全加载并保持在内存中. 一般地, 如果没有出现兼容性问题, 不要勾选这一项
+<ul>
+<li>当没有勾选这个功能时, MMAP 处于启用状态, 模型文件被部分加载进内存中(换言之, 你用到哪里就加载哪里). 如果内存不够, 就将一部分模型从内存中丢出去</li>
+<li>当勾选这个功能时, MMAP 处于禁用状态, 模型文件被完全加载进内存中. 如果内存不够, 就会导致电脑死机</li>
+</ul>
+</li>
+<li>Context Size: 模型的上下文长度. 一般可以设置为8192. 当你的显存有富余时可以尝试加大这个数值</li>
+<li>Model: 选择你要加载的模型. 点击右侧的 <code>Browse</code> 按钮, 选择你下载的 GGUF 模型. 如果这个模型被分成了多块, 则选择第一块模型文件</li>
+</ul>
+<p>当一切都配置好后, 点击界面右下角的 <code>Launch</code> 按钮, koboldcpp 将会加载模型, 你可以在命令行窗口中观察加载的细节. 当加载完成后, 你可以通过在 <code>http://127.0.0.1:5001/api</code> 上运行的<strong>API</strong>来访问模型</p>
+<h3 id="ollama">ollama<a hidden class="anchor" aria-hidden="true" href="#ollama">#</a></h3>
+<p>当且仅当你满足以下<strong>所有条件</strong>时, 推荐你使用 ollama:</p>
+<ul>
+<li>你是小白</li>
+<li>你知道如何打开<strong>命令行</strong>, 并且输入简单的<strong>命令</strong></li>
+<li>你不想上hf寻找模型, 只想体验官方发布的模型; 或者你不想花太多时间跟着教程走, 只想最快速地跑起来一个大模型玩一玩</li>
+</ul>
+<p><a href="https://ollama.ai">ollama</a> 提供了最简单的大模型加载方案, 但相应地, 想要在 ollama 上做自定义配置也是最麻烦的</p>
+<p>首先安装 ollama:</p>
+<ul>
+<li>如果你也在用 Arch Linux, 可以通过一行命令快速安装 ollama:
+<ul>
+<li>如果你是N卡用户: <code>sudo pacman -S ollama-cuda</code></li>
+<li>如果你是A卡用户: <code>sudo pacman -S ollama-rocm</code></li>
+<li>如果你不想用显卡加载大模型: <code>sudo pacman -S ollama</code></li>
+<li>当你安装完成后, 通过这个命令来开启 ollama 服务: <code>sudo systemctl enable --now ollama</code></li>
+</ul>
+</li>
+<li>如果你在使用 Windows, 则前往<a href="https://ollama.com/download">ollama下载页面</a>下载 Windows 下的安装包, 然后依照指示进行安装</li>
+</ul>
+<p>然后使用 ollama 下载模型:</p>
+<ul>
+<li>你可以在<a href="https://ollama.com/library">ollama模型页面</a>浏览可以下载的模型</li>
+<li>当你找到你想要的模型后, 通过<strong>运行</strong> <code>ollama pull 模型名:标签</code> 来下载模型, 例如 <code>ollama pull qwen2.5:32b</code> 就会下载 Qwen2.5-32B 模型</li>
+</ul>
+<p>此时你已经可以从 <code>http://127.0.0.1:11434</code> 这个由 ollama 提供的OpenAI兼容的<strong>API</strong>来访问你的模型了</p>
+<p>或者你也可以在<strong>命令行</strong>中和模型对话, 通过<strong>运行</strong>: <code>ollama run 模型名:标签</code> 来启动, 例如 <code>ollama run qwen2.5:32b</code></p>
+<h3 id="lmstudio">LMStudio<a hidden class="anchor" aria-hidden="true" href="#lmstudio">#</a></h3>
+<p>当且仅当你满足以下<strong>任一条件</strong>时, 推荐你使用 <a href="https://lmstudio.ai/">LMStudio</a>:</p>
+<ul>
+<li>你是小白</li>
+<li>你在使用 MacOS</li>
+<li>你想要用一些自己下载的模型, 但是 koboldcpp 那么多的可配置选项让你有些无所适从</li>
+<li>你喜欢漂亮的软件界面</li>
+</ul>
+<p>相较于koboldcpp, LMStudio的优势在于:</p>
+<ul>
+<li>减少了需要配置的项目</li>
+<li>提供了应用内下载模型的功能: 在LMStudio内, 你可以直接搜索<strong>hf</strong>上的模型然后下载</li>
+<li>应用内即可直接和大模型对话, 界面效果远强于koboldcpp</li>
+</ul>
+<p>总的来说, LMStudio是相比koboldcpp和ollama更加新手友好的选择, 唯一让我不喜欢的地方是, 它是闭源的商业软件</p>
+<p>要使用 LMStudio, 首先前往<a href="https://lmstudio.ai/">官方网站</a>下载安装包, 然后按照指示安装. 当安装完成后, 你应该能看到 LMStudio 的应用程序. 初始时是英文界面, 需要你切换到中文</p>
+<p>然后, 在 LMStudio 左侧选项卡内找到开发者一栏, 点击后在顶部左侧找到 LM运行时 按钮, 点击进入后端配置. 在这个页面中, 观察页面左侧的栏目, 根据你使用的显卡选择软件包下载:</p>
+<ul>
+<li>NVIDIA 显卡: 选择 CUDA llama.cpp (Windows)</li>
+<li>AMD 显卡: 选择 ROCm llama.cpp (Windows)</li>
+</ul>
+<p>下载完运行时后, 在左侧选项卡内找到搜索一栏, 然后搜索你喜欢的模型进行下载. 注意这个过程需要你能流畅地访问<strong>HF</strong></p>
+<p>当你下载完成后, 在左侧选项卡内找到聊天一栏, 然后载页面最上方找到 选择要加载的模型 按钮, 在出现的下拉选项卡中点击你下载的模型, 然后点击加载模型, 等待模型加载完成. 然后你就可以在 LMStudio 内和模型对话了</p>
+<h3 id="llamacpp">llama.cpp<a hidden class="anchor" aria-hidden="true" href="#llamacpp">#</a></h3>
+<p>当你满足以下<strong>所有条件</strong>时, 推荐使用 llama.cpp:</p>
+<ul>
+<li>你了解如何编译一个项目</li>
+<li>你能读懂英语并且遵守文档给出的操作</li>
+<li>你在使用 Linux</li>
+<li>你想要得到使用 GGUF 能达到的最高性能</li>
+</ul>
+<p>llama.cpp 的官方文档<a href="https://github.com/ggerganov/llama.cpp">在这</a>, 我就不多写了. 都用这个了, 想必不是小白了</p>
+<h3 id="tabbyapi">tabbyAPI<a hidden class="anchor" aria-hidden="true" href="#tabbyapi">#</a></h3>
+<p>别称: tabby</p>
+<p>当且仅当你满足以下<strong>所有条件</strong>时, 推荐你使用 tabbyAPI:</p>
+<ul>
+<li>你使用 Linux, 或者 WSL</li>
+<li>你能读懂英语</li>
+<li>你能阅读配置文件, 并能根据英语注释修改其中的一些项目</li>
+<li>你能够使用<strong>命令行</strong>完成安装依赖, 启动项目等操作</li>
+<li>你选择使用 EXL2 量化的模型</li>
+</ul>
+<p>首先使用git克隆仓库到本地:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>git clone https://github.com/theroyallab/tabbyAPI.git
+</span></span></code></pre></div><p><strong>然后安装依赖</strong>:</p>
+<ul>
+<li>N卡用户, 且cuda版本是12.几: <code>pip install &quot;.[cu121]&quot;</code></li>
+<li>N卡用户, 且cuda版本是11.几: <code>pip install &quot;.[cu118]&quot;</code></li>
+<li>A卡用户: <code>pip install &quot;.[rocm]&quot;</code></li>
+</ul>
+<blockquote>
+<p><strong>请注意</strong>: 如果你的显卡是n卡3000系以下, 或者使用A卡的话, 需要在自动安装依赖后手动卸载flash_attn: <code>pip uninstall flash_attn</code></p>
+</blockquote>
+<p><strong>接着创建配置文件</strong>:</p>
+<p>配置文件在<code>config.yml</code>中, 配置文件格式为yml. 一开始你需要将<code>config_sample.yml</code>复制一份成<code>config.yml</code>, 然后修改里面的配置.</p>
+<p>要修改的配置有这些:</p>
+<ul>
+<li>host: tabbyAPI的监听地址, 默认是<code>0.0.0.0</code></li>
+<li>port: tabbyAPI的监听端口, 默认是<code>5000</code></li>
+<li>disable_auth: 看你要不要开启api key验证了, 如果要验证的话, 第一次运行后在同目录下会生成一个<code>api_tokens.yml</code>文件, 你可以在里面自定义你的api kay</li>
+<li>model_dir: 模型所在的文件夹, 注意这里不是模型文件对应的文件夹, 而是模型文件所在的父文件夹. 如果你的模型文件是<code>/path/to/models/qwen2-72b</code>, 那么这里就应该是<code>/path/to/models</code></li>
+<li>model_name: 模型文件名, 这就是你模型文件夹的名称了. 沿用上一点的示例, 这里应该是<code>qwen2-72b</code></li>
+<li>use_dummy_models: 是否使用 dummy 模型, 开的话会生成一个<code>gpt-3.5-turbo</code>的模型名, 可以用来给openai app当兼容的后端</li>
+<li>use_as_default: 一个列表. 是否将某个设置作为加载模型时的默认设置. 当你更改下面的条目时, 需要将对应的配置名加入到这个列表中</li>
+<li>max_seq_len: 最大上下文长度, 默认是从模型中获取, 你可以根据自己的显存大小调整这个值</li>
+<li>cache_mode: kv cache模式, 推荐Q4, 最激进的量化, 也最省显存</li>
+<li>chunk_size: 一个chunk的大小, 决定了模型处理上下文的速度, 这个值越大, 模型处理上下文速度越快, 但是显存占用越大. 范围是512~4096. 建议就在4个经典值中选: 512, 1024, 2048, 4096, 其他的跟这4个值相比, 速度大差不差</li>
+</ul>
+<p><strong>最后启动项目</strong>:</p>
+<p>运行<code>python start.py</code>即可自动安装全部依赖并且按照配置文件加载模型</p>
+<p>之后就可以<code>python main.py</code>跳过依赖安装, 直接加载模型了</p>
+<h3 id="vllm">vllm<a hidden class="anchor" aria-hidden="true" href="#vllm">#</a></h3>
+<p>当且仅当你满足以下<strong>所有条件</strong>时, 推荐你使用 vllm:</p>
+<ul>
+<li>你有多并发的请求</li>
+<li>你使用 Linux, 或者 WSL</li>
+<li>你能读懂英语</li>
+<li>你能阅读官方文档, 哪怕文档非常长</li>
+<li>你能够根据官方文档在<strong>命令行</strong>中输入你想要的命令行参数</li>
+</ul>
+<p>首先按照<a href="https://docs.vllm.ai/en/latest/getting_started/installation.html">官方文档</a>安装 vllm</p>
+<p>然后跟着<a href="https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html">vllm官方文档</a>来启动OpenAI兼容的<strong>API</strong>吧, 太多了, 我写不动了</p>
+<h3 id="aphrodite-engine">Aphrodite engine<a hidden class="anchor" aria-hidden="true" href="#aphrodite-engine">#</a></h3>
+<p>别称: aph</p>
+<p>曾经支持 EXL2 量化的模型, 但现在已经不支持了. 我把它视为 vllm 的下位替代. 我找不到你应该使用 Aphrodite engine 而不是 vllm 的理由</p>
+<h3 id="webui">webui<a hidden class="anchor" aria-hidden="true" href="#webui">#</a></h3>
+<p>全称: text-generation-webui; 别称: tgw, ooba</p>
+<p>这是非常陈旧且混乱的加载器. 哪怕群主推荐的是这个, 哪怕群主给的一键包里是这个, 你都应该立刻将这个加载器删除</p>
+<p>在任何情况下都<strong>不推荐</strong>使用这个加载器, 除非你:</p>
+<ul>
+<li><strong>清楚地</strong>知道自己在干什么</li>
+<li>具有<strong>强大的</strong>排错和调试能力</li>
+<li>有充足的时间来折腾</li>
+<li><del>喜欢赤石</del></li>
+</ul>
+<h2 id="常见问题速查">常见问题速查<a hidden class="anchor" aria-hidden="true" href="#常见问题速查">#</a></h2>
+<p><strong>我能跑多大的模型?</strong></p>
+<p>在 huggingface 上找一个模型, 点开它的文件页面, 计算里面文件的总大小. 然后加上 1~2G, 就是这个模型大致的内存/显存占用了. 看看你自己电脑的内存/显存大小是否足够</p>
+<p><strong>模型无法加载怎么办?</strong></p>
+<p>检查你的模型量化类型是否和你使用的加载器匹配, 检查你下载的模型是否完整. 另, 如果你在用 text-generation-webui, 请将它删除并换用其它的加载器</p>
+<p><strong>酒馆无法安装?</strong></p>
+<p>检查你是否有命令行代理, 如果没有, 请配置好再安装酒馆. 通过以下命令快速检查你的命令行代理是否有效:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl google.com -v
+</span></span></code></pre></div><p>如果有效, 你应该能在命令行看到一些输出信息, 否则这个命令行将会卡住, 没有什么反应</p>
+<p><strong>跑模型速度慢怎么办?</strong></p>
+<p>尝试更换更小的模型, 或者更低等级的量化. 尝试更换量化方式. 尝试购买更强大的电脑硬件</p>
+<p><strong>模型胡言乱语怎么办?</strong></p>
+<p>检查你的模型是否是 instruct 模型,检查是否正确地选择了 prompt 模板, 检查采样器参数是否正确设置, 检查显卡显存是否够用</p>
+<p><strong>酒馆无法连接加载器?</strong></p>
+<p>检查是否填写了正确的<strong>API</strong>地址. 通常<strong>API</strong>地址由你选择的加载器给定</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/">入门教程</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="http://localhost:1313/">自由AI阵线！</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+        <br>
+        RSS Supported!
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

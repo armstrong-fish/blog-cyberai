@@ -5,4 +5,4 @@ draft = false
 
 +++
 
-ceshi
+[记录W8A8量化上传流程](/posts/w8a8-quantification/)
