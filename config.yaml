@@ -1,0 +1,42 @@
+baseURL: 'https://cyberai.pages.dev'
+languageCode: 'en-us'
+title: '自由AI阵线！'
+theme: 'PaperMod'
+frontmatter:
+  format: yaml
+taxonomies:
+  tag: tags
+  series: series
+  category: categories
+
+params:
+    ShowReadingTime: true
+    ShowToc: true
+    TocOpen: true
+    ShowCodeCopyButtons: true
+    fastSearch: true
+    homeInfoParams:
+        Title: 我们的目标是成为赛博文化，AI技术交流的自由乐土！
+
+menu:
+  main:
+    - identifier: Archive
+      name: Archive
+      url: /archives/
+      weight: 10
+    - identifier: Tags
+      name: Tags
+      url: /tags/
+      weight: 20
+    - identifier: Beginners
+      name: Beginners
+      url: /categories/beginners/
+      weight: 30
+    - identifier: Qualifications
+      name: Qualifications
+      url: /categories/qualifications/
+      weight: 40
+    - identifier: About
+      name: About
+      url: /about/
+      weight: 50

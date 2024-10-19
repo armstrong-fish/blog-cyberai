@@ -2,11 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/about/</loc>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/archives/</loc>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/</loc>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/beginners/</loc>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
+  </url><url>
     <loc>http://localhost:1313/</loc>
-    <lastmod>2024-10-11T23:23:47-02:30</lastmod>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/categories/advanced/</loc>
+    <lastmod>2024-10-18T02:30:05-02:30</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2024-10-11T23:23:47-02:30</lastmod>
+    <lastmod>2024-10-17T21:55:31-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/posts/w8a8-quantification/</loc>
+    <lastmod>2024-10-17T21:55:31-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E9%87%8F%E5%8C%96/</loc>
+    <lastmod>2024-10-17T21:55:31-02:30</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/%E9%AB%98%E7%BA%A7%E6%95%99%E7%A8%8B/</loc>
+    <lastmod>2024-10-17T21:55:31-02:30</lastmod>
   </url><url>
     <loc>http://localhost:1313/posts/cybermate4/</loc>
     <lastmod>2024-10-11T23:23:47-02:30</lastmod>
@@ -22,10 +49,6 @@
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
-  </url><url>
     <loc>http://localhost:1313/series/</loc>
-  </url><url>
-    <loc>http://localhost:1313/tags/</loc>
   </url>
 </urlset>

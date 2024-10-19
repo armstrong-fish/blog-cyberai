@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>大模型 on 自由AI阵线！</title>
+    <link>http://localhost:1313/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/</link>
+    <description>Recent content in 大模型 on 自由AI阵线！</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 17 Oct 2024 21:55:31 -0230</lastBuildDate><atom:link href="http://localhost:1313/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>记录W8A8量化上传流程</title>
+      <link>http://localhost:1313/posts/w8a8-quantification/</link>
+      <pubDate>Thu, 17 Oct 2024 21:55:31 -0230</pubDate>
+      
+      <guid>http://localhost:1313/posts/w8a8-quantification/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本文章经作者同意，转载自自由AI阵线社区，版权所有！&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;首先在autodl注册账号、选择租用/创建实例，进入如下界面：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image1.png&#34; alt=&#34;image1&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;选择按量计费，在地区中多做切换，不同地区的可选GPU型号不同。这里我选择四卡4090D，卡的数目可以在租用后随意调整至1~4卡之间，对于22B模型的量化已经足够，因此不必在意这里的选取。&lt;/p&gt;
+&lt;p&gt;数据盘扩容选择100G就足够了，因为下载的原始22B模型约44G，量化后的W8A8模型22G，共66G。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image2.png&#34; alt=&#34;image2&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;最后在镜像处选择基础镜像，我的选择如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image3.png&#34; alt=&#34;image3&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;完成以上这些，选择立即创建，设备就租到了。设备租到以后不要直接点开机按钮，而是选择“更多”中的“无卡模式开机”，费用很低，所以可以耐心折腾：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image4.png&#34; alt=&#34;image4&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image5.png&#34; alt=&#34;image5&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;无卡模式开机后，看到显示了ssh登录口令和快捷工具列表，点击JupyterLab：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image6.png&#34; alt=&#34;image6&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;JupyterLab中，点击“终端”按钮，做W8A8量化前的准备工作：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image7.png&#34; alt=&#34;image7&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image8.png&#34; alt=&#34;image8&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;打开终端，可以看到它提示了数据盘/root/autodl-tmp，也就是说掏钱扩容100G的空间和初始赠送的50G空间都位于这个叫做autodl-tmp的文件夹里，往这个文件夹里放东西，这拢共150G的数据盘就会越用越少。&lt;/p&gt;
+&lt;p&gt;接下来安装量化所需的python工具，在终端中输入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pip install llmcompressor -i https://mirrors.aliyun.com/pypi/simple/
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;就可以自动安装llmcompressor的最新版本了，截至发帖，它的最新版本是0.2.0：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image9.png&#34; alt=&#34;image9&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image10.png&#34; alt=&#34;image10&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;这样就是安装成功了，接下来进入数据盘下载模型和量化所需的语料。先看看当前的位置，在终端中输入ls这两个字母回车：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image11.png&#34; alt=&#34;image11&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;可以看见目前终端中的目录层级可以看到和左侧文件视图里一一对应的项目：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image12.png&#34; alt=&#34;image12&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;实际上，当在JupyterLab的启动页中创建终端时，新打开的终端总是会与左侧文件视图具有一致的层级关系，所以有时如果懒得敲命令切换目录，可以在左边通过鼠标点击切换到目的目录后在右边创建新的终端来直接得到一个切换好目录的终端：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image13.png&#34; alt=&#34;image13&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image14.png&#34; alt=&#34;image14&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image15.png&#34; alt=&#34;image15&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;接下来下载量化所需的校准语料。在位于autodl-tmp目录下的终端中输入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;export HF_ENDPOINT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;https://hf-mirror.com&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image16.png&#34; alt=&#34;image16&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;看似没有动静，实则已经设置好了huggingface的镜像站以加速下载，否则在中国境内是很难连接huggingface的。&lt;/p&gt;
+&lt;p&gt;在位于autodl-tmp目录下的终端中输入：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;huggingface-cli download --repo-type dataset --resume-download HuggingFaceH4/ultrachat_200k --local-dir ultrachat_200k
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image17.png&#34; alt=&#34;image17&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;这样就开始下载了，有时下载会变得越来越慢，等不及了可以在终端中按Ctrl和c的组合键强制终端中的下载进程关闭，多按几次：&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/W8A8/image18.png&#34; alt=&#34;image18&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;然后按方向键的上键切换到下载指令，回车，再一次下载。下载进度不会丢失：&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
